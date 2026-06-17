@@ -1,0 +1,7 @@
+.DS_Store
+*.docx
+*.tgz
+PromptforVideo.md
+notebooklm_text_sources/
+notebooklm_video_manifest.json
+notebooklm_video_workflow.md

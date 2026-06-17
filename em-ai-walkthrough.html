@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The EM × AI Field Guide</title>
+<style>
+  :root{
+    --navy:#15263F;
+    --navy-deep:#0D1828;
+    --teal:#2B9E92;
+    --teal-dark:#1E756C;
+    --teal-soft:#E3F2F0;
+    --cream:#F8F4EA;
+    --cream-deep:#F0E9D8;
+    --ink:#22303F;
+    --ink-soft:#5A6A7A;
+    --warn:#B5651D;
+    --warn-soft:#FBEEDF;
+    --line:#D8D0BC;
+    --white:#FFFFFF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family: Arial, Helvetica, sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    line-height:1.6;
+    min-height:100vh;
+  }
+
+  /* kinetics: progress strip */
+  .progress-strip{
+    position:fixed;top:0;left:0;right:0;z-index:60;
+    background:rgba(248,244,234,.92);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+    transform:translateY(-100%);transition:transform .35s ease;
+    pointer-events:none;
+  }
+  .progress-strip.show{transform:translateY(0);}
+  body.has-progress .topbar{padding-top:46px;}
+  .progress-inner{
+    max-width:1060px;margin:0 auto;padding:8px 24px;
+    display:flex;align-items:center;gap:14px;
+  }
+  .progress-track{flex:1;height:5px;background:var(--cream-deep);border-radius:3px;overflow:hidden;max-width:340px;}
+  .progress-fill{
+    height:100%;width:0%;border-radius:3px;
+    background:linear-gradient(90deg,var(--teal),var(--teal-dark));
+    transition:width .6s cubic-bezier(.22,1,.36,1);
+  }
+  .progress-label{font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap;}
+  .progress-toast{
+    max-width:1060px;margin:0 auto;padding:0 24px;
+    overflow:hidden;max-height:0;transition:max-height .4s ease;
+  }
+  .progress-toast.show{max-height:52px;}
+  .progress-toast-inner{
+    margin:0 0 8px;background:var(--navy);color:var(--cream);border-radius:6px;
+    padding:9px 16px;font-size:.86rem;display:flex;align-items:center;gap:10px;
+  }
+  .progress-toast-inner b{font-family:Georgia,serif;font-weight:normal;color:var(--teal);}
+  .progress-toast-inner button{
+    pointer-events:auto;margin-left:auto;background:var(--teal);color:var(--navy-deep);
+    border:none;border-radius:4px;padding:5px 12px;font-size:.8rem;font-weight:bold;cursor:pointer;
+  }
+  @media(prefers-reduced-motion:reduce){
+    .progress-strip,.progress-fill,.progress-toast{transition:none;}
+  }
+
+  .serif{font-family: Georgia, 'Times New Roman', serif;}
+
+  /* ---------- shared layout ---------- */
+  .view{display:none;min-height:100vh;}
+  .view.active{display:block;animation:fadein .45s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none!important;transition:none!important;}
+    html{scroll-behavior:auto;}
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px;}
+
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 24px;max-width:1060px;margin:0 auto;
+  }
+  .brand{
+    font-family:Georgia,serif;font-size:1.05rem;color:var(--navy);
+    letter-spacing:.04em;cursor:pointer;background:none;border:none;
+  }
+  .brand b{color:var(--teal-dark);}
+  .crumb{font-size:.8rem;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase;}
+
+  button{cursor:pointer;font-family:inherit;}
+  button:focus-visible, a:focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:4px;}
+
+  .btn{
+    display:inline-block;background:var(--navy);color:var(--cream);
+    border:none;border-radius:6px;padding:14px 30px;font-size:1rem;
+    letter-spacing:.03em;transition:background .2s, transform .15s;
+  }
+  .btn:hover{background:var(--teal-dark);transform:translateY(-1px);}
+  .btn.ghost{background:transparent;color:var(--navy);border:1.5px solid var(--navy);}
+  .btn.ghost:hover{background:var(--navy);color:var(--cream);}
+  .btn.small{padding:9px 18px;font-size:.88rem;}
+
+  /* ---------- hero ---------- */
+  #hero{background:var(--navy);color:var(--cream);display:none;}
+  #hero.active{display:flex;flex-direction:column;}
+  .hero-inner{
+    flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;
+    text-align:center;padding:60px 24px 80px;
+  }
+  .hero-kicker{
+    font-size:.78rem;letter-spacing:.28em;text-transform:uppercase;color:var(--teal);
+    margin-bottom:26px;
+  }
+  h1.hero-title{
+    font-family:Georgia,serif;font-weight:normal;
+    font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.12;max-width:760px;
+  }
+  h1.hero-title em{font-style:italic;color:var(--teal);}
+  .hero-sub{
+    margin-top:26px;max-width:560px;font-size:1.05rem;color:#C9D4E0;line-height:1.7;
+  }
+  .hero-cta{margin-top:42px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center;}
+  .btn.light{background:var(--teal);color:var(--navy-deep);font-weight:bold;}
+  .btn.light:hover{background:var(--cream);}
+  .btn.outline-light{background:transparent;color:var(--cream);border:1.5px solid rgba(248,244,234,.5);}
+  .btn.outline-light:hover{border-color:var(--cream);background:rgba(248,244,234,.08);transform:translateY(-1px);}
+
+  /* constellation */
+  .constellation{margin:46px auto 0;width:min(420px,86vw);}
+  .constellation svg{width:100%;height:auto;display:block;}
+  .const-caption{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:#7E90A6;margin-top:10px;}
+  .jw{transition:color .25s;cursor:default;}
+  .principle p:hover .jw{color:var(--teal);}
+  #constSvg .const-dot{pointer-events:all;}
+
+  /* ---------- intro (the idea) ---------- */
+  .section-pad{padding:64px 0 90px;}
+  .eyebrow{font-size:.76rem;letter-spacing:.24em;text-transform:uppercase;color:var(--teal-dark);margin-bottom:14px;}
+  h2.head{font-family:Georgia,serif;font-weight:normal;font-size:clamp(1.7rem,4vw,2.5rem);color:var(--navy);line-height:1.2;margin-bottom:18px;}
+  .lede{font-size:1.06rem;color:var(--ink-soft);max-width:620px;}
+
+  .preshow{
+    margin-top:32px;background:var(--white);border:1px solid var(--line);
+    border-radius:10px;padding:24px 26px;display:grid;gap:14px;
+  }
+  .preshow-row{display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:start;}
+  .preshow-k{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-dark);font-weight:bold;padding-top:2px;}
+  .preshow-v{font-size:.95rem;color:var(--ink);}
+  @media(max-width:600px){.preshow-row{grid-template-columns:1fr;gap:4px;}}
+
+  .idea-steps{margin-top:44px;display:grid;gap:0;}
+  .idea-step{
+    display:grid;grid-template-columns:64px 1fr;gap:20px;align-items:start;
+    padding:26px 0;border-top:1px solid var(--line);
+  }
+  .idea-step:last-of-type{border-bottom:1px solid var(--line);}
+  .idea-num{
+    font-family:Georgia,serif;font-size:2rem;color:var(--teal);line-height:1;
+    padding-top:4px;
+  }
+  .idea-step h3{font-family:Georgia,serif;font-weight:normal;font-size:1.25rem;color:var(--navy);margin-bottom:6px;}
+  .idea-step p{color:var(--ink-soft);max-width:600px;}
+
+  .principle{
+    margin-top:48px;background:var(--navy);color:var(--cream);
+    border-radius:10px;padding:34px 36px;position:relative;
+  }
+  .principle .eyebrow{color:var(--teal);}
+  .principle p{font-family:Georgia,serif;font-size:1.22rem;line-height:1.55;}
+  .principle p em{color:var(--teal);font-style:normal;}
+
+  .center{text-align:center;}
+  .mt-40{margin-top:40px;}
+
+  .close-steps{margin-top:40px;display:grid;gap:0;}
+  .close-step{
+    display:grid;grid-template-columns:64px 1fr;gap:20px;align-items:start;
+    padding:28px 0;border-top:1px solid var(--line);
+  }
+  .close-step:last-of-type{border-bottom:1px solid var(--line);}
+  .close-num serif,.close-num{font-family:Georgia,serif;font-size:2rem;color:var(--teal);line-height:1;padding-top:4px;}
+  .close-step h3{font-family:Georgia,serif;font-weight:normal;font-size:1.3rem;color:var(--navy);margin-bottom:8px;}
+  .close-step p{color:var(--ink-soft);max-width:600px;margin-bottom:14px;}
+  .close-charge{
+    margin-top:40px;background:var(--navy);color:var(--cream);border-radius:10px;
+    padding:34px 36px;text-align:center;
+  }
+  .close-charge p{font-family:Georgia,serif;font-size:1.3rem;line-height:1.5;max-width:620px;margin:0 auto;}
+
+  /* ---------- 3C picker ---------- */
+  .picker-links{display:flex;gap:12px;flex-wrap:wrap;}
+
+  /* medium-shot map */
+  #mapBody{margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  @media(max-width:820px){#mapBody{grid-template-columns:1fr;}}
+  .map-col{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:20px 18px;}
+  .map-col-head{display:flex;gap:12px;align-items:flex-start;border-bottom:2px solid;padding-bottom:14px;margin-bottom:4px;}
+  .map-c-mark{flex-shrink:0;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-family:Georgia,serif;font-size:1rem;color:var(--cream);}
+  .map-col-head h3{font-family:Georgia,serif;font-weight:normal;font-size:1.3rem;color:var(--navy);line-height:1.1;}
+  .map-c-sub{font-size:.8rem;color:var(--ink-soft);display:block;margin-top:3px;}
+  .map-c-count{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-dark);margin:10px 0 6px;}
+  .map-habits{display:grid;gap:7px;}
+  .map-chip{
+    text-align:left;background:var(--cream);border:1px solid var(--line);border-left:3px solid var(--cc);
+    border-radius:6px;padding:10px 12px;transition:transform .12s, box-shadow .12s, background .12s;
+  }
+  .map-chip:hover{transform:translateX(3px);box-shadow:0 4px 12px rgba(21,38,63,.1);background:var(--white);}
+  .map-chip.explored{background:var(--white);}
+  .map-chip.explored .map-chip-name::after{content:' ✓';color:var(--teal-dark);font-size:.8rem;}
+  .map-chip-name{display:block;font-family:Georgia,serif;font-size:1rem;color:var(--navy);}
+  .map-chip-def{display:block;font-size:.78rem;color:var(--ink-soft);margin-top:2px;line-height:1.4;}
+  .map-wf{margin-top:46px;padding-top:8px;}
+  .map-wf-h{font-family:Georgia,serif;font-weight:normal;font-size:1.5rem;color:var(--navy);margin-bottom:4px;}
+  .map-wf-lede{font-size:.92rem;color:var(--ink-soft);max-width:600px;margin-bottom:18px;}
+  #mapWf{display:grid;gap:8px;}
+  .map-wf-row{
+    text-align:left;display:grid;grid-template-columns:1fr auto;gap:8px 16px;align-items:baseline;
+    background:var(--white);border:1px solid var(--line);border-radius:7px;padding:13px 16px;
+    transition:border-color .12s, transform .12s;
+  }
+  .map-wf-row:hover{border-color:var(--teal);transform:translateX(3px);}
+  .map-wf-row.diag{border-color:var(--teal);background:var(--teal-soft);}
+  .map-wf-name{font-family:Georgia,serif;font-size:1.08rem;color:var(--navy);}
+  .map-wf-habits{font-size:.74rem;letter-spacing:.04em;text-transform:uppercase;color:var(--teal-dark);text-align:right;}
+  @media(max-width:600px){.map-wf-row{grid-template-columns:1fr;}.map-wf-habits{text-align:left;}}
+
+  .c-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:42px;}
+  @media(max-width:760px){.c-grid{grid-template-columns:1fr;}}
+  .c-card{
+    background:var(--white);border:1px solid var(--line);border-radius:10px;
+    padding:30px 26px;text-align:left;transition:transform .18s, box-shadow .18s, border-color .18s;
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .c-card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(21,38,63,.12);border-color:var(--teal);}
+  .c-card .c-mark{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-family:Georgia,serif;font-size:1.05rem;color:var(--cream);}
+  .c-card h3{font-family:Georgia,serif;font-weight:normal;font-size:1.45rem;color:var(--navy);}
+  .c-card p{font-size:.92rem;color:var(--ink-soft);flex:1;}
+  .c-card .c-count{font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal-dark);}
+
+  /* ---------- habit list ---------- */
+  .h-list{margin-top:36px;display:grid;gap:12px;}
+  .h-row{
+    background:var(--white);border:1px solid var(--line);border-radius:8px;
+    padding:20px 22px;display:grid;grid-template-columns:1fr auto;gap:6px 16px;align-items:center;
+    text-align:left;transition:border-color .15s, transform .15s, box-shadow .15s;
+  }
+  .h-row:hover{border-color:var(--teal);transform:translateX(4px);box-shadow:0 6px 16px rgba(21,38,63,.08);}
+  .h-row h4{font-family:Georgia,serif;font-weight:normal;font-size:1.18rem;color:var(--navy);}
+  .h-row .h-def{grid-column:1/-1;font-size:.9rem;color:var(--ink-soft);}
+  .h-row .h-visited{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-dark);justify-self:end;}
+  .back-link{
+    background:none;border:none;color:var(--teal-dark);font-size:.9rem;
+    letter-spacing:.04em;padding:4px 0;margin-bottom:8px;
+  }
+  .back-link:hover{text-decoration:underline;}
+
+  /* ---------- habit walkthrough ---------- */
+  .habit-head{padding-top:8px;}
+  .habit-c-tag{display:inline-block;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--cream);padding:5px 12px;border-radius:20px;margin-bottom:14px;}
+  .habit-title{font-family:Georgia,serif;font-weight:normal;font-size:clamp(2rem,5vw,3rem);color:var(--navy);line-height:1.15;}
+  .habit-def{font-family:Georgia,serif;font-style:italic;font-size:1.15rem;color:var(--ink-soft);margin-top:10px;max-width:620px;}
+  .habit-frameworks{margin-top:12px;font-size:.82rem;color:var(--ink-soft);max-width:640px;}
+  .habit-frameworks b{color:var(--teal-dark);font-family:Arial,sans-serif;letter-spacing:.04em;}
+  .habit-video{margin-top:30px;}
+  .video-slot{
+    position:relative;width:100%;max-width:680px;aspect-ratio:16/9;
+    background:var(--navy);border-radius:10px;overflow:hidden;
+  }
+  .video-slot iframe,.video-slot video{position:absolute;inset:0;width:100%;height:100%;border:0;}
+  .video-placeholder{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    color:var(--cream);background:linear-gradient(135deg,var(--navy),var(--navy-deep));
+  }
+  .video-play{
+    width:54px;height:54px;border-radius:50%;background:var(--teal);
+    display:flex;align-items:center;justify-content:center;color:var(--navy-deep);font-size:1.2rem;padding-left:4px;
+  }
+  .video-ph-text{font-family:Georgia,serif;font-size:1.1rem;letter-spacing:.02em;}
+  .video-ph-sub{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:#7E90A6;}
+  .video-segue{
+    margin-top:18px;max-width:640px;font-family:Georgia,serif;font-size:1.08rem;color:var(--navy);
+    border-left:4px solid var(--teal);padding-left:16px;line-height:1.5;
+  }
+
+  .steps{margin-top:40px;display:grid;gap:18px;padding-bottom:30px;}
+  .step-card{
+    background:var(--white);border:1px solid var(--line);border-left:5px solid var(--teal);
+    border-radius:8px;padding:26px 28px;display:none;
+  }
+  .step-card.revealed{display:block;animation:fadein .4s ease;}
+  .step-label{font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--teal-dark);margin-bottom:8px;}
+  .step-card p{color:var(--ink);max-width:640px;}
+  .step-card.warn{border-left-color:var(--warn);background:var(--warn-soft);}
+  .step-card.warn .step-label{color:var(--warn);}
+  .step-card .tension{
+    margin-top:14px;font-family:Georgia,serif;font-size:1.08rem;color:var(--navy);
+    border-top:1px dashed var(--line);padding-top:12px;
+  }
+  .continue-row{display:flex;justify-content:flex-start;}
+
+  /* prompts */
+  .prompt-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .ptab{
+    background:var(--cream-deep);border:1px solid var(--line);border-radius:20px;
+    padding:8px 18px;font-size:.86rem;color:var(--ink);
+  }
+  .ptab.on{background:var(--navy);color:var(--cream);border-color:var(--navy);}
+  .prompt-pane{display:none;}
+  .prompt-pane.on{display:block;}
+  .prompt-pane .p-explain{font-size:.9rem;color:var(--ink-soft);margin-bottom:12px;max-width:620px;}
+  .mode-banner{font-size:.9rem;line-height:1.5;border-radius:7px;padding:12px 15px;margin-bottom:16px;max-width:640px;}
+  .mode-banner b{font-family:Georgia,serif;font-weight:normal;}
+  .model-banner{background:var(--teal-soft);border-left:4px solid var(--teal);color:var(--ink);}
+  .model-banner b{color:var(--teal-dark);}
+  .teach-banner{background:var(--cream-deep);border-left:4px solid var(--navy);color:var(--ink);}
+  .teach-banner b{color:var(--navy);}
+  .frame-grid{display:grid;gap:9px;margin-bottom:14px;max-width:640px;}
+  .frame-after{margin-top:14px;margin-bottom:0;}
+  .frame-row{display:grid;grid-template-columns:155px 1fr;gap:14px;align-items:start;}
+  .frame-k{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--teal-dark);padding-top:2px;}
+  .frame-v{font-size:.92rem;color:var(--ink);}
+  .seed-grid{display:grid;gap:14px;max-width:660px;}
+  .seed-row{display:grid;grid-template-columns:110px 1fr;gap:14px;align-items:start;}
+  .seed-k{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);font-weight:bold;padding-top:2px;}
+  .seed-v{font-size:.93rem;color:var(--ink);}
+  @media(max-width:600px){
+    .frame-row,.seed-row{grid-template-columns:1fr;gap:3px;}
+    .frame-k,.seed-k{padding-top:0;}
+  }
+  .prompt-box{
+    background:var(--navy-deep);color:#DCE6EE;border-radius:8px;padding:20px 22px;
+    font-family:'Courier New',monospace;font-size:.92rem;line-height:1.6;position:relative;
+  }
+  .copy-btn{
+    position:absolute;top:12px;right:12px;background:var(--teal);color:var(--navy-deep);
+    border:none;border-radius:5px;padding:6px 14px;font-size:.78rem;font-weight:bold;letter-spacing:.05em;
+  }
+  .copy-btn:hover{background:var(--cream);}
+
+  .habit-footer{
+    margin-top:34px;padding:26px 0 70px;border-top:1px solid var(--line);
+    display:flex;gap:14px;flex-wrap:wrap;align-items:center;
+  }
+
+  /* example collapsible */
+  details.ex{
+    margin-top:16px;border-top:1px dashed var(--line);padding-top:14px;
+  }
+  details.ex summary{
+    cursor:pointer;list-style:none;font-size:.82rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--teal-dark);display:flex;align-items:center;gap:8px;
+  }
+  details.ex summary::-webkit-details-marker{display:none;}
+  details.ex summary::before{content:'+';font-size:1.05rem;line-height:1;color:var(--teal-dark);}
+  details.ex[open] summary::before{content:'−';}
+  details.ex summary:focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:4px;}
+  .ex-pair{margin-top:14px;display:grid;gap:10px;}
+  .ex-half{background:var(--white);border:1px solid var(--line);border-radius:6px;padding:14px 16px;}
+  .ex-half .ex-label{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:5px;}
+  .ex-half.skip .ex-label{color:var(--warn);}
+  .ex-half.train{border-color:var(--teal);}
+  .ex-half.train .ex-label{color:var(--teal-dark);}
+  .ex-half p{font-size:.92rem;color:var(--ink);}
+  .ex-lit{
+    margin-top:12px;font-size:.8rem;color:var(--ink-soft);
+  }
+  .ex-lit a{color:var(--teal-dark);text-decoration:none;border-bottom:1px dotted var(--teal-dark);cursor:pointer;}
+  .ex-lit a:hover{color:var(--navy);}
+
+  /* references */
+  .ref-list{margin-top:36px;display:grid;gap:14px;}
+  .ref-card{background:var(--white);border:1px solid var(--line);border-radius:8px;padding:22px 24px;}
+  .ref-card .ref-cite{font-size:.86rem;color:var(--navy);font-weight:bold;margin-bottom:6px;}
+  .ref-card .ref-find{font-size:.93rem;color:var(--ink);}
+  .ref-card .ref-habits{font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--teal-dark);margin-top:8px;}
+  .ref-card .ref-caveat{
+    margin-top:10px;font-size:.85rem;color:var(--warn);background:var(--warn-soft);
+    border-radius:5px;padding:8px 12px;
+  }
+  .ref-note{
+    margin-top:30px;background:var(--cream-deep);border:1px solid var(--line);
+    border-radius:8px;padding:22px 24px;font-size:.93rem;color:var(--ink-soft);
+  }
+  .ref-note b{color:var(--navy);font-weight:normal;font-family:Georgia,serif;}
+  .principle-ref{margin-top:14px;font-size:.78rem;color:#8FA2B8;}
+  .principle-ref a{color:var(--teal);text-decoration:none;border-bottom:1px dotted var(--teal);cursor:pointer;}
+
+  /* workflows */
+  .wf-card.featured{border-color:var(--teal);border-width:2px;background:var(--teal-soft);}
+  .wf-card.featured .wf-start{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal-dark);margin-bottom:8px;}
+  details.wfp{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px;}
+  details.wfp summary{
+    cursor:pointer;list-style:none;font-size:.8rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--teal-dark);display:flex;align-items:center;gap:8px;
+  }
+  details.wfp summary::-webkit-details-marker{display:none;}
+  details.wfp summary::before{content:'+';font-size:1rem;line-height:1;}
+  details.wfp[open] summary::before{content:'−';}
+  details.wfp summary:focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:4px;}
+  details.wfp .wfp-inner{margin-top:14px;}
+  details.wfp .prompt-box{font-size:.84rem;max-height:340px;overflow-y:auto;}
+  .wf-when{
+    margin-top:12px;background:var(--teal-soft);border-radius:7px;padding:11px 14px;
+    font-size:.9rem;color:var(--ink);line-height:1.5;
+  }
+  .wf-when b{font-family:Georgia,serif;font-weight:normal;color:var(--teal-dark);}
+  details.wfp .prompt-pane{display:none;}
+  details.wfp .prompt-pane.on{display:block;}
+  details.wfp .seed-grid{max-width:none;}
+  details.buildp{margin-top:16px;border-top:1px dashed var(--line);padding-top:12px;}
+  details.buildp summary{
+    cursor:pointer;list-style:none;font-size:.78rem;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--navy);font-weight:bold;display:flex;align-items:center;gap:8px;
+  }
+  details.buildp summary::-webkit-details-marker{display:none;}
+  details.buildp summary::before{content:'+';font-size:1rem;line-height:1;color:var(--navy);}
+  details.buildp[open] summary::before{content:'−';}
+  details.buildp summary:focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:4px;}
+  .buildp-inner{margin-top:12px;}
+  .buildp-note{font-size:.84rem;color:var(--ink-soft);margin-bottom:10px;max-width:640px;}
+  .wf-steps{margin-top:14px;display:grid;gap:8px;}
+  .wf-step{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;font-size:.92rem;color:var(--ink);}
+  .wf-step .wf-sn{
+    width:22px;height:22px;border-radius:50%;background:var(--teal-soft);color:var(--teal-dark);
+    font-size:.75rem;font-weight:bold;display:flex;align-items:center;justify-content:center;line-height:1;
+  }
+  .wf-human{
+    margin-top:14px;background:var(--cream-deep);border-left:4px solid var(--navy);
+    border-radius:0 6px 6px 0;padding:10px 14px;font-size:.88rem;color:var(--ink);
+  }
+  .wf-human b{color:var(--navy);font-family:Georgia,serif;font-weight:normal;}
+  .wf-card.featured .wf-human{background:var(--white);}
+
+  .wf-list{margin-top:36px;display:grid;gap:14px;}
+  .wf-card{background:var(--white);border:1px solid var(--line);border-radius:8px;padding:24px 26px;}
+  .wf-card h4{font-family:Georgia,serif;font-weight:normal;font-size:1.2rem;color:var(--navy);margin-bottom:4px;}
+  .wf-card .wf-habits{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--teal-dark);margin-bottom:8px;}
+  .wf-card p{font-size:.93rem;color:var(--ink-soft);}
+
+  footer.site{
+    background:var(--navy);color:#8FA2B8;text-align:center;
+    padding:26px 24px;font-size:.8rem;letter-spacing:.04em;
+  }
+  footer.site b{color:var(--cream);font-weight:normal;}
+</style>
+</head>
+<body>
+
+<div id="progress" class="progress-strip" aria-hidden="true">
+  <div class="progress-inner">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-label" id="progressLabel">0 of 18 habits explored</span>
+  </div>
+  <div class="progress-toast" id="progressToast"></div>
+</div>
+
+<!-- ===================== HERO ===================== -->
+<section class="view active" id="hero">
+  <div class="hero-inner">
+    <div class="hero-kicker">The EM × AI Field Guide · For Engineering Faculty</div>
+    <h1 class="hero-title serif">Entrepreneurial mindset is the <em>edge</em> AI can't replace.</h1>
+    <p class="hero-sub">A field guide to the 18 habits of entrepreneurial mindset in an age of AI. Practice each one in your own work, and teach it in your classroom, with AI as the instrument rather than the replacement.</p>
+    <div class="hero-cta">
+      <button class="btn light" onclick="go('intro')">Start the walkthrough</button>
+      <button class="btn outline-light" onclick="go('map')">See all 18 habits</button>
+    </div>
+    <div class="constellation">
+      <svg id="constSvg" viewBox="0 0 420 150" role="img" aria-label="Eighteen habits arranged in three groups"></svg>
+      <div class="const-caption">18 habits · 3 families · one principle</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== INTRO ===================== -->
+<section class="view" id="intro">
+  <div class="topbar">
+    <button class="brand" onclick="go('hero')">EM <b>×</b> AI</button>
+    <span class="crumb">The idea</span>
+  </div>
+  <div class="wrap section-pad">
+    <div class="eyebrow">Why this guide exists</div>
+    <h2 class="head serif">The whole idea in three steps</h2>
+    <p class="lede">Entrepreneurial mindset is made from 18 habits, each formed through repeated practice. AI can deepen that practice or quietly erase it. The 18 habits of entrepreneurial mindset are built, not taught. AI is now the biggest force acting on how they get built.</p>
+
+    <div class="preshow">
+      <div class="preshow-row">
+        <span class="preshow-k">What this is</span>
+        <span class="preshow-v">A working guide to practicing 18 entrepreneurial mindset habits in an age of AI, for your own work and your classroom.</span>
+      </div>
+      <div class="preshow-row">
+        <span class="preshow-k">How to use it</span>
+        <span class="preshow-v">Read the idea below, then pick a habit that matters to you. Each one shows how AI helps, the trap to avoid, a prompt to run yourself, and an activity to run with students.</span>
+      </div>
+      <div class="preshow-row">
+        <span class="preshow-k">What you'll leave with</span>
+        <span class="preshow-v">One habit worth practicing this week, a prompt you can use today, and a class activity you could run next.</span>
+      </div>
+    </div>
+
+    <div class="idea-steps">
+      <div class="idea-step">
+        <div class="idea-num serif">1</div>
+        <div>
+          <h3 class="serif">Habits form through practice</h3>
+          <p>Curiosity, systems thinking, value creation. None of these are facts you can teach in a lecture. They are habits, and habits are built by doing the thinking yourself, repeatedly.</p>
+        </div>
+      </div>
+      <div class="idea-step">
+        <div class="idea-num serif">2</div>
+        <div>
+          <h3 class="serif">AI short-circuits practice by default</h3>
+          <p>Every student and every faculty member now has AI in their pocket. Used naively, it hands over clean answers and the thinking never happens. Each habit has a specific failure mode, an anti-pattern, where AI quietly does the habit for you.</p>
+        </div>
+      </div>
+      <div class="idea-step">
+        <div class="idea-num serif">3</div>
+        <div>
+          <h3 class="serif">The right prompt flips the relationship</h3>
+          <p>Each prompt in this guide turns AI into a sparring partner for one specific habit. Instead of AI being curious for you, the prompt makes you practice being curious. Every habit comes in two modes. Run it yourself in your own work, or run it with students as a classroom activity.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="principle">
+      <div class="eyebrow">The master principle</div>
+      <p class="serif">You can't evaluate work in a domain you haven't mastered, so polished output reads as competent when it isn't. AI amplifies the <span class="jw">judgment</span> you bring. It cannot supply the <span class="jw">judgment</span> you lack. <em>Develop expertise first, then let AI scale it. Never the reverse.</em></p>
+      <div class="principle-ref">Research basis: Kruger &amp; Dunning (1999) · <a onclick="go('refs')">See all sources</a></div>
+    </div>
+
+    <div class="center mt-40">
+      <button class="btn" onclick="go('picker')">Choose where to start</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 3C PICKER ===================== -->
+<section class="view" id="picker">
+  <div class="topbar">
+    <button class="brand" onclick="go('hero')">EM <b>×</b> AI</button>
+    <span class="crumb">Pick a family</span>
+  </div>
+  <div class="wrap section-pad">
+    <div class="eyebrow">The 3Cs</div>
+    <h2 class="head serif">Which habits do you care about today?</h2>
+    <p class="lede">Every habit belongs to one of three families. Pick the one closest to what you or your students are working on. You can always come back.</p>
+    <div class="c-grid" id="cGrid"></div>
+    <div class="mt-40 picker-links">
+      <button class="btn ghost small" onclick="go('map')">See all 18 habits on one map</button>
+      <button class="btn ghost small" onclick="go('workflows')">Or see how habits combine → the 7 workflows</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== MEDIUM SHOT / MAP ===================== -->
+<section class="view" id="map">
+  <div class="topbar">
+    <button class="brand" onclick="go('hero')">EM <b>×</b> AI</button>
+    <span class="crumb">The whole map</span>
+  </div>
+  <div class="wrap section-pad">
+    <button class="back-link" onclick="go('picker')">← Back to the families</button>
+    <div class="eyebrow">The whole picture</div>
+    <h2 class="head serif">18 habits, three families, seven workflows</h2>
+    <p class="lede">The full landscape on one screen. Three families of habits, each habit a practice you can run alone, and seven workflows that fire clusters of them together on a real task. Tap any habit to go straight to it.</p>
+    <div id="mapBody"></div>
+    <div class="map-wf">
+      <div class="eyebrow">When habits combine</div>
+      <h3 class="serif map-wf-h">The seven workflows</h3>
+      <p class="map-wf-lede">Each workflow composes the habits noted beside it into one task-shaped session.</p>
+      <div id="mapWf"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HABIT LIST ===================== -->
+<section class="view" id="habitlist">
+  <div class="topbar">
+    <button class="brand" onclick="go('hero')">EM <b>×</b> AI</button>
+    <span class="crumb" id="hlCrumb"></span>
+  </div>
+  <div class="wrap section-pad">
+    <button class="back-link" onclick="go('picker')">← All three families</button>
+    <div class="eyebrow" id="hlEyebrow"></div>
+    <h2 class="head serif" id="hlTitle"></h2>
+    <p class="lede" id="hlDesc"></p>
+    <div class="h-list" id="hList"></div>
+  </div>
+</section>
+
+<!-- ===================== HABIT DETAIL ===================== -->
+<section class="view" id="habit">
+  <div class="topbar">
+    <button class="brand" onclick="go('hero')">EM <b>×</b> AI</button>
+    <span class="crumb" id="hCrumb"></span>
+  </div>
+  <div class="wrap section-pad habit-head">
+    <button class="back-link" id="hBack">← Back to habits</button>
+    <span class="habit-c-tag" id="hTag"></span>
+    <h2 class="habit-title serif" id="hTitle"></h2>
+    <p class="habit-def" id="hDef"></p>
+    <p class="habit-frameworks" id="hFrameworks"></p>
+
+    <div class="habit-video" id="hVideo">
+      <div class="video-slot" id="videoSlot">
+        <div class="video-placeholder">
+          <span class="video-play">▶</span>
+          <span class="video-ph-text">Habit video</span>
+          <span class="video-ph-sub" id="videoPhSub"></span>
+        </div>
+      </div>
+      <p class="video-segue">You've seen why this habit matters and how AI can help build it. Here's how to put it to work, in four quick moves.</p>
+    </div>
+
+    <div class="steps" id="hSteps"></div>
+
+    <div class="habit-footer">
+      <button class="btn small" id="nextHabitBtn"></button>
+      <button class="btn ghost small" id="backListBtn">Pick a different habit</button>
+      <button class="btn ghost small" onclick="go('workflows')">See the workflows</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== WORKFLOWS ===================== -->
+<section class="view" id="workflows">
+  <div class="topbar">
+    <button class="brand" onclick="go('hero')">EM <b>×</b> AI</button>
+    <span class="crumb">The 7 workflows</span>
+  </div>
+  <div class="wrap section-pad">
+    <button class="back-link" onclick="go('picker')">← Back to the habits</button>
+    <div class="eyebrow">When habits combine</div>
+    <h2 class="head serif">Seven task-shaped workflows</h2>
+    <p class="lede">Real work rarely exercises one habit at a time. Each workflow composes a cluster of habits around a task you actually face. The diagnostic routes you, the other six orchestrate.</p>
+    <div class="wf-list" id="wfList"></div>
+    <div class="center mt-40">
+      <button class="btn" onclick="go('close')">Take it with you →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== POST-SHOW / CLOSE ===================== -->
+<section class="view" id="close">
+  <div class="topbar">
+    <button class="brand" onclick="go('hero')">EM <b>×</b> AI</button>
+    <span class="crumb">Take it with you</span>
+  </div>
+  <div class="wrap section-pad">
+    <div class="eyebrow">Before you go</div>
+    <h2 class="head serif">Pick one. Practice it. Plus it.</h2>
+    <p class="lede">A guide you read changes nothing. A guide you act on changes a habit. The whole point of this one is the rep you take next, so leave with a single concrete move, not eighteen.</p>
+
+    <div class="close-steps">
+      <div class="close-step">
+        <div class="close-num serif">1</div>
+        <div>
+          <h3 class="serif">Try one habit this week</h3>
+          <p>Choose the single habit you felt most when you read it, the one where the anti-pattern stung a little. Run its prompt on a real task of your own before the week is out. One habit, practiced once, beats all eighteen admired.</p>
+          <button class="btn ghost small" onclick="go('picker')">Choose that habit →</button>
+        </div>
+      </div>
+      <div class="close-step">
+        <div class="close-num serif">2</div>
+        <div>
+          <h3 class="serif">Then bring one into your classroom</h3>
+          <p>Once you've run a habit yourself, you'll teach it better. Take the same habit, open its Run it with students blueprint, and design one activity for your next course. Start small, a single class, a single assignment, then plus it from there.</p>
+          <button class="btn ghost small" onclick="go('workflows')">See the workflows →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="close-charge">
+      <p class="serif">The habit you build in yourself is the one you can build in your students. Start with one.</p>
+    </div>
+
+    <div class="center mt-40">
+      <button class="btn ghost small" onclick="go('refs')">The research behind all this</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== REFERENCES ===================== -->
+<section class="view" id="refs">
+  <div class="topbar">
+    <button class="brand" onclick="go('hero')">EM <b>×</b> AI</button>
+    <span class="crumb">Research basis</span>
+  </div>
+  <div class="wrap section-pad">
+    <button class="back-link" onclick="go('picker')">← Back to the habits</button>
+    <div class="eyebrow">The evidence behind the anti-patterns</div>
+    <h2 class="head serif">Research basis</h2>
+    <p class="lede">The 18 habits come from the KEEN Habits of Entrepreneurial Mindset. The claims that need evidence are the anti-patterns, the specific ways careless AI use erodes each habit. These studies are the anchors.</p>
+    <div class="ref-list" id="refList"></div>
+    <div class="ref-note">
+      <b>A note on coverage.</b> Seven habits (Opportunity Seeking, Future-Minded, Systems Thinking, Customer-Centric Thinking, Impact Thinking, Socially Minded, and Resourcefulness) have no study matching their specific anti-pattern. The offloading and homogenization mechanisms above plausibly generalize to them, but habit-specific evidence is an open research gap. We cite where the evidence is and stay quiet where it isn't.
+    </div>
+  </div>
+</section>
+
+<footer class="site">
+  <b>The EM × AI Field Guide</b> · Built on the KEEN Habits of Entrepreneurial Mindset · <a onclick="go('refs')" style="color:var(--teal);cursor:pointer;text-decoration:none;">Research basis</a> · Works with ChatGPT, Claude, and Gemini
+</footer>
+
+<script>
+/* =============== DATA =============== */
+const CS = {
+  curiosity:{name:"Curiosity",color:"#2B9E92",desc:"Habits that fuel exploration, challenge assumptions, and reveal opportunities."},
+  connections:{name:"Connections",color:"#15263F",desc:"Habits that integrate perspectives, ideas, and systems to drive innovation and impact."},
+  value:{name:"Creating Value",color:"#B5651D",desc:"Habits that drive actions to deliver meaningful outcomes that benefit others at scale."}
+};
+
+const HABITS=[
+{c:"curiosity",
+ name:"Inquisitiveness",
+ def:"Applies curiosity about a continuously changing world.",
+ frameworks:"The Five Whys · Question Formulation Technique · First-principles decomposition",
+ move:"Stay close to reality. Inspect raw data, talk to people.",
+ fosters:"AI can run the early stages of these methods at speed. Ask it for a first-principles decomposition of an unfamiliar system, a structured Five Whys chain to test, or the ten questions a skeptical expert would ask. Crucially, have it attach each question to the kind of primary source that would answer it, so the model becomes a map of what to verify rather than a substitute for verifying.",
+ anti:"Letting the AI summary stand in for the primary source. Your curiosity narrows to whatever the model surfaced, and you stop noticing the anomaly in the raw data.",
+ tension:"AI is a fast on-ramp to questions, but not a substitute for looking.",
+ mWhat:"Turns AI into a fast on-ramp to a new field that points you back to primary sources instead of standing in for them.",
+ mWhen:"You're entering an unfamiliar domain and need to get oriented without taking the AI's summary on faith.",
+ model:"I'm new to [domain]. Give me the 10 questions a skeptical expert would ask before trusting any claim in this area. For each question, tell me what kind of primary source would answer it - a paper, a dataset, a standard - so I can check it myself. Don't summarize the field for me, point me at what I should read.",
+ mGood:"Ten questions that expose what you don't know yet, each tied to a real source you can go verify. If it just hands you a tidy overview, it defeated the purpose.",
+ tSetup:"Give students a topic outside their expertise and 20 minutes to map it with AI. Then they must verify three of the AI's claims against primary sources - the actual paper, dataset, or standard - and report one place where the AI was wrong, vague, or out of date. The verification is the assignment, not the map.",
+ tRole:"Maps unfamiliar territory fast, which is its real strength here. Students do the checking against real sources themselves, because the habit being built is the reflex to confirm before trusting, and that reflex dies if AI does the confirming too.",
+ tAssess:"The rigor of the three verifications and the specific error they caught, not how thorough the initial map looked."},
+{c:"curiosity",
+ name:"Contrarian Thinking",
+ def:"Explores alternative or disruptive views of accepted solutions.",
+ frameworks:"The Duncker diagram · de Bono's Six Thinking Hats · Janusian thinking",
+ move:"Challenge assumptions.",
+ fosters:"This is where AI becomes a real ideation partner. Have it build a Duncker diagram of your problem, mapping the functional alternatives that functional fixedness hid, then wear the Black Hat to critique each branch, or hold the Janusian opposite of your assumption. Its breadth across domains surfaces alternative means a single student would never list.",
+ anti:"AI is tuned to be agreeable. Used only as a helper, it reinforces the conventional view instead of disrupting it.",
+ tension:"AI defaults to agreeable, so make it argue against you.",
+ mWhat:"Turns AI into a devil's advocate against your own decision so you find the weak point before someone else does.",
+ mWhen:"You've made a design or strategic call and want it stress-tested before you commit.",
+ model:"Make the strongest case you can that my approach to [X] is wrong. Argue the opposing view as hard as you can, don't hedge. Then name the single assumption I'm making that, if it turned out false, would break the whole thing. End by telling me what evidence would settle whether that assumption holds.",
+ mGood:"A challenge sharp enough to make you pause, landing on one load-bearing assumption and a way to test it. If it flatters you, push it harder.",
+ tSetup:"Students submit a design decision they've already made, then prompt AI to build the strongest possible case against it. They write a one-page memo that either defends the original decision or revises it, citing what the critique surfaced.",
+ tRole:"Generates the opposing case tirelessly and without ego, which a peer often won't. Students must judge whether the critique is sound and decide what to do, because the habit is weighing a challenge, not just receiving one.",
+ tAssess:"How well they evaluate the quality of the critique and justify their final call, not whether they changed their mind."},
+{c:"curiosity",
+ name:"Opportunity Seeking",
+ def:"Identifies trends and unmet needs to uncover new opportunities.",
+ frameworks:"Jobs-to-be-Done · White-space gap analysis · The Kano model",
+ move:"Move up the value chain. Define the real problem.",
+ fosters:"AI can build the white-space map at a speed no student can match, articulating the jobs current solutions are hired to do and which are well served. That clears the documented ground so your judgment can hunt the unserved job the map exposes.",
+ anti:"AI surfaces what's well documented, not what's absent. You end up chasing crowded problems everyone already sees.",
+ tension:"AI finds what already exists, not what is missing.",
+ mWhat:"Uses AI to clear away the crowded, well-documented solutions so you can aim at the gaps.",
+ mWhen:"You're hunting for a problem worth solving and want to avoid the ones everyone already sees.",
+ model:"Here are three trends in [field]. For each, map what already exists - the solutions and products people have today. Then point to where the gap is between what's technically possible now and what people actually have. Of those gaps, tell me which one is least crowded and why it might have been overlooked.",
+ mGood:"A clear map of the saturated ground and one or two genuine openings, with a reason each has been missed. Vague \"underserved markets\" answers mean push for specifics.",
+ tSetup:"Give a real constraint, such as a campus or community need. AI maps the solutions that already exist for it. Students must then identify and justify one unmet need the AI did not surface, and explain why it has been overlooked.",
+ tRole:"Clears the well-documented ground quickly so attention goes to the gaps. Students find what's absent, because AI surfaces what's written down, and the opportunity usually lives in what isn't.",
+ tAssess:"The significance of the gap they found and the strength of their argument that it's real and unmet."},
+{c:"curiosity",
+ name:"Experimentation",
+ def:"Constantly experiments and iterates to test ideas and explore what-ifs.",
+ frameworks:"Design of Experiments (Taguchi, factorial) · Build-measure-learn",
+ move:"Draft more versions. Cheaper intelligence means more attempts.",
+ fosters:"AI turns one attempt into dozens and can help design the experiment that chooses among them. Ask for eight orthogonal approaches, each varying a different factor, then have it help construct the DOE matrix — the controlled runs that isolate each variable's effect. The cheap generation is what makes a richer experimental design possible.",
+ anti:"Cheap generation tempts you to ship the first plausible output. Volume without selection is noise, not experimentation.",
+ tension:"More attempts only count if you select among them.",
+ mWhat:"Generates many genuinely different approaches at once so you can test across them instead of polishing the first idea.",
+ mWhen:"You're early on a problem and want range before you commit to a direction.",
+ model:"Generate 8 approaches to [problem], each optimizing a different variable or priority. Make them different in kind, not eight versions of one idea. For each, name the single assumption it bets on and the one test that would tell me if it works. Then suggest which two are worth prototyping first.",
+ mGood:"Eight approaches that actually diverge, each with its bet and its test named. If three of them are the same idea reworded, ask again and demand real spread.",
+ tSetup:"Students generate several distinct AI-assisted variants of a design or approach, then run a real test or simulation on them and report which variant won and whether their starting hypothesis held.",
+ tRole:"Produces many variants cheaply, turning one attempt into ten. Students design and run the test that selects among them, because volume without a selection step is noise, and the habit being built is disciplined iteration, not generation.",
+ tAssess:"The quality of the test design and what they concluded from the results, not the number of variants produced."},
+{c:"curiosity",
+ name:"Confronting Ambiguity",
+ def:"Operates with care in complex and uncertain environments.",
+ frameworks:"The Cynefin framework · Assumption mapping · Bounding the unknowns",
+ move:"Judgment is the new work.",
+ fosters:"AI can help structure a messy problem rather than resolve it. Ask it to classify the problem against Cynefin, build an assumption map ranked by how much each assumption would change the answer, and bound the unknowns into ranges. Used this way it makes the structure of the uncertainty explicit instead of papering over it.",
+ anti:"The most dangerous one. A clean, confident answer manufactures false certainty and lets you skip sitting with the discomfort that real judgment requires. The habit atrophies precisely because AI makes ambiguity feel resolved.",
+ tension:"Clean answers manufacture a false sense of certainty.",
+ mWhat:"Uses AI to map a messy problem's unknowns rather than paper over them with a confident answer.",
+ mWhen:"A problem is genuinely underspecified and you're tempted to force premature certainty.",
+ model:"This problem is underspecified on purpose - don't resolve the ambiguity, map it. List the unknowns, then sort them: which would most change the answer if resolved, which can be known with effort, and which can't be known yet. Don't propose a solution. Give me the structure of the uncertainty.",
+ mGood:"An organized account of what's unknown and what matters most, with no rush to an answer. If it jumps to a recommendation, redirect it back to mapping.",
+ tSetup:"Hand students a deliberately underspecified brief. They may use AI only to map the unknowns - what is uncertain, what would change the answer, what can't yet be known - and submit that structured account rather than a solution.",
+ tRole:"Helps give shape to a messy problem so it can be reasoned about. Students must stay in the ambiguity rather than collapsing it, because a confident AI answer manufactures false certainty, and the habit is tolerating the discomfort that real judgment requires.",
+ tAssess:"How completely and clearly they characterize the uncertainty, not whether they reached an answer."},
+{c:"curiosity",
+ name:"Future-Minded",
+ def:"Considers emerging trends in people, systems, and environments.",
+ frameworks:"Scenario planning (two-axis method) · Backcasting · Weak-signal scanning",
+ move:"Play the long game. Upgrade yourself.",
+ fosters:"AI can generate divergent scenarios and scan weak signals across domains you don't track. Ask it to build a two-axis scenario set around your field's critical uncertainties, backcast the dependencies for a desired future, and surface the present-day indicators for each branch. Its cross-domain reach widens the range of futures you consider.",
+ anti:"AI is trained on the past. Over-relying on it anchors you to yesterday's consensus about tomorrow.",
+ tension:"AI is trained on the past, so it anchors you to yesterday's consensus.",
+ mWhat:"Generates divergent futures and the present-day signals that would tell you which one is arriving.",
+ mWhen:"You're planning over a long horizon and want to avoid anchoring on today's consensus.",
+ model:"Generate three divergent 10-year scenarios for [field] - not optimistic-middle-pessimistic, but genuinely different futures. For each, tell me what would have to be true now for it to unfold, and name one present-day weak signal I could actually monitor to see if we're heading there. Then tell me which signal is most worth watching.",
+ mGood:"Three real alternatives, each with a concrete signal you could track starting today. If the scenarios are just degrees of the same future, ask for more divergence.",
+ tSetup:"Students build three divergent ten-year scenarios for a field, using AI, then identify the present-day leading indicators they could actually monitor to tell which scenario is unfolding.",
+ tRole:"Generates divergent futures and weak signals across domains a student doesn't personally track. Students choose which indicators are worth watching, because AI is trained on the past and the judgment is in deciding what present signal matters.",
+ tAssess:"The plausibility and genuine divergence of the scenarios, and the quality of the indicators they commit to watching."},
+{c:"connections",
+ name:"Creativity",
+ def:"Integrates information from disparate sources to spark new ideas.",
+ frameworks:"TRIZ (contradiction matrix, biomimicry) · Morphological analysis (Zwicky box) · SCAMPER",
+ move:"Use AI to multiply strengths. Compare options faster.",
+ fosters:"AI is unusually strong at the recombination these methods need. It can fill a Zwicky morphological matrix and surface viable combinations across the space, map a design contradiction to TRIZ inventive principles with biomimetic analogies, and run SCAMPER systematically. Its cross-domain reading reaches the distant analogy a single student never would.",
+ anti:"AI regresses to the mean of its training data. Used lazily it returns the average idea, not the novel one. The creativity is in your weird prompt, not its safe answer.",
+ tension:"AI regresses to the mean unless your prompt pushes it somewhere strange.",
+ mWhat:"Pulls mechanisms from unrelated fields into your problem so you escape the obvious solution.",
+ mWhen:"You're stuck in the standard approaches and want a genuinely different angle.",
+ model:"Show me what [my problem] looks like in three completely unrelated fields - biology, economics, architecture, whatever fits. For each, describe the mechanism that field uses to solve its version of the problem, then suggest how I could adapt that mechanism to mine. Favor the surprising transfer over the obvious one.",
+ mGood:"Three analogies from genuinely distant fields, each with a mechanism you could actually borrow. If the answers stay inside your own discipline, push it wider.",
+ tSetup:"Students bring a stuck problem. AI surfaces how three unrelated fields solve a structurally similar problem. Students adapt one of those analogies into a working concept for their own problem and explain the transfer.",
+ tRole:"Supplies cross-domain analogies a student wouldn't reach alone. Students do the adaptation, because AI regresses to the average idea unless pushed, and the creative act is in the transfer, not the list.",
+ tAssess:"The fit of the chosen analogy and the clarity of how they carried it across to their problem."},
+{c:"connections",
+ name:"Systems Thinking",
+ def:"Recognizes interdependencies in systems and identifies leverage points.",
+ frameworks:"The Iceberg Model · Causal loop diagrams · Stock-and-flow (system dynamics)",
+ move:"Build systems, not one-off answers.",
+ fosters:"AI can draft and stress-test these maps. Describe a system and have it propose a causal loop diagram with the reinforcing and balancing loops and candidate leverage points, populate the layers of the Iceberg Model from event to pattern to structure, and sketch a stock-and-flow view. Its breadth surfaces interconnections across subsystems you'd treated separately.",
+ anti:"Repeatedly asking for one-off answers trains you to think in tasks, not systems. The convenience hides the leverage you're leaving on the table.",
+ tension:"One-off answers train you to think in tasks rather than systems.",
+ mWhat:"Converts a task you keep redoing into a reusable system instead of another one-off answer.",
+ mWhen:"You notice you've solved the same kind of problem manually more than twice.",
+ model:"I keep doing [task] manually. Help me design a reusable system for it - a template, a checklist, and a prompt I can run each time - so it never starts from scratch again. Show me the structure first, then tell me which parts should stay flexible and which should be fixed every time.",
+ mGood:"A concrete template and process you could hand to someone else, with a clear line between the fixed and flexible parts. If it just re-solves this one instance, ask for the system.",
+ tSetup:"Instead of submitting a single finished deliverable, students build and hand in the reusable system - a template plus a process - that they would give next year's team to do the same task well.",
+ tRole:"Helps draft the template and articulate the steps. Students decide the structure, because repeatedly asking AI for one-off answers trains task-thinking, and the habit being built is seeing the reusable machine behind the single job.",
+ tAssess:"Whether the system actually works when a fresh person picks it up, not how polished the one instance looks."},
+{c:"connections",
+ name:"Knowledge Synthesis",
+ def:"Combines ideas, information, and experiences to form new understanding.",
+ frameworks:"Concept mapping (Novak) · The Zettelkasten method · Linked knowledge structures",
+ move:"Your expertise must become files.",
+ fosters:"AI can help externalize tacit knowledge into a structured, linked form. Have it interview you about how you make a recurring judgment and turn the answers into a concept map or linked notes in your own words, proposing connections you then accept or reject. That accept-or-reject step is the active work of synthesis.",
+ anti:"If synthesis happens only inside the AI and you never internalize it, you've outsourced understanding. You can produce the output but not defend it.",
+ tension:"Synthesis that lives inside the AI, which you cannot defend, is not really yours.",
+ mWhat:"Externalizes how you actually make a recurring judgment into a reusable file the AI can apply consistently.",
+ mWhen:"You make the same kind of expert call often and want AI to extend it without losing your standards.",
+ model:"Interview me about how I actually make [decision]. Ask me one question at a time, dig into my criteria, examples I think are excellent, examples I reject, and mistakes I refuse to repeat. When you've got enough, turn my answers into a standards file I can reuse to direct you on future tasks. Keep it tight and in my words.",
+ mGood:"A genuine back-and-forth that surfaces criteria you hadn't articulated, ending in a file that sounds like you. If it stops asking and starts assuming, slow it down.",
+ tSetup:"Across the course, students build a personal expertise file - their decision criteria, examples they admire, and anti-examples they reject - and use it to direct AI on a final task.",
+ tRole:"Applies the file consistently and at scale. Students must be able to defend its contents from memory, because if the synthesis lives only inside the AI, they can produce the output but not own the understanding.",
+ tAssess:"The quality of the file and their ability to explain and defend their own criteria without notes."},
+{c:"connections",
+ name:"Implications Thinking",
+ def:"Anticipates the long-term impacts and consequences of actions.",
+ frameworks:"The Futures Wheel · FMEA · Consequence scanning",
+ move:"Find the missing risk.",
+ fosters:"AI can extend these maps wider and faster than you can alone. It can radiate a Futures Wheel outward through several rings, surfacing the distant consequences hard to hold in working memory, and draft an FMEA table of failure modes, effects, and detectability across a system, reaching consequences in adjacent subsystems you hadn't connected.",
+ anti:"AI's consequence-mapping is generic unless pushed. Accepting the first list gives obvious risks and misses the specific one that matters.",
+ tension:"The first consequences AI offers are generic, so the one that matters takes pushing.",
+ mWhat:"Traces the downstream consequences of a decision past the obvious first-order ones.",
+ mWhen:"You're about to commit to a change and want to see what it disturbs two steps away.",
+ model:"Trace the second- and third-order consequences of [decision]. Skip the obvious first-order effects, I already see those. Walk the chain: if this happens, then what, and then what after that. Flag the one downstream effect that's least visible right now and most likely to bite, and suggest how I'd catch it early.",
+ mGood:"A chain of effects that reaches something you hadn't considered, ending on the non-obvious risk and an early warning sign. If it lists only the surface risks, send it deeper.",
+ tSetup:"Students take a design decision and use AI to trace its consequences, then must surface one non-obvious second or third-order effect the AI missed, along with a mitigation for it.",
+ tRole:"Maps the obvious first-order consequences quickly. Students push past them to the effect two steps downstream, because AI's first-pass consequence list is generic, and the habit is seeing what breaks where no one is looking.",
+ tAssess:"The non-obvious effect they found and the soundness of the mitigation they propose."},
+{c:"connections",
+ name:"Strategic Thinking",
+ def:"Develops long-term strategies with clear milestones.",
+ frameworks:"Milestone roadmapping & OKRs · Critical Path Method · Wardley mapping",
+ move:"Set direction and strategy. Don't race AI on execution.",
+ fosters:"AI can handle the tactics so your attention goes to sequence and dependency. Once you set the milestones, have it propose tactical options under each, compute the critical path and its slack, and draft a Wardley map of where components sit on the evolution axis. It's a strong generator of alternatives and dependency analysis — as long as you hold the strategic decisions.",
+ anti:"If AI sets the strategy too, you become an executor of its plan. Strategy is where human ownership has to stay.",
+ tension:"AI that sets the strategy makes you its executor rather than its author.",
+ mWhat:"Keeps you owning the sequence while AI fills in the tactical options under each step.",
+ mWhen:"You have a goal and constraints and need to decide what happens in what order.",
+ model:"I'll set the goal and constraints: [state them]. Propose three different sequencing strategies to reach it - ordered paths, not task lists. For each, name its first milestone, its main risk, and what it bets on. Don't recommend one, lay them out so I can choose. I own the sequence.",
+ mGood:"Three orderings that genuinely differ, each with a first milestone and a named risk, the choice left to you. If it collapses into one plan, ask for real alternatives.",
+ tSetup:"Give students a real design goal with its actual constraints - a budget, a deadline, a performance target. Before they touch AI, they set the milestones themselves and put them in order, then write a one-page plan defending why this sequence and not another.",
+ tRole:"Once the sequence is set, students may use AI only to generate tactical options under each milestone - the how of each step - never the order of the steps. The moment AI proposes the sequence, the student has handed over the part that was theirs to own.",
+ tAssess:"The logic of their sequencing and the quality of their tradeoff reasoning, not the polish of the plan."},
+{c:"connections",
+ name:"Risk Awareness",
+ def:"Proactively incorporates risk management into decision-making.",
+ frameworks:"The pre-mortem (Klein) · FMEA with risk priority numbers · Fault tree analysis",
+ move:"Take responsibility for results.",
+ fosters:"AI is a fast pre-mortem and FMEA engine. Run a pre-mortem to generate failure modes through prospective hindsight, then have it draft an FMEA with severity, occurrence, and detectability and computed risk priority numbers, or sketch a fault tree from a top event. It produces a comprehensive, ranked starting point faster than you could alone.",
+ anti:"AI can flag risk but never owns the outcome. Treating its risk list as the accountability confuses a checklist for responsibility. The buck stays human.",
+ tension:"AI can flag a risk, but it never owns the outcome.",
+ mWhat:"Runs a structured pre-mortem so failure modes surface while you can still act on them.",
+ mWhen:"A project is underway or about to start and you want the risks on the table early.",
+ model:"Run a pre-mortem on [project]. Assume it's a year from now and the project failed. Work backward and list the failure modes that got us there - concrete ones, not \"poor communication.\" Sort them by how likely and how damaging each is. I'll decide which ones I'm personally accountable for, so make the list specific enough for me to own.",
+ mGood:"A specific, ranked set of failure modes you can assign ownership to. If the risks are generic, ask it to tie each one to this project's actual details.",
+ tSetup:"Students run a pre-mortem on a project with AI, imagining a year has passed and it failed, then explicitly take ownership of which failure modes they will personally monitor, and how.",
+ tRole:"Surfaces failure modes and edge cases faster than a student would alone. Students decide which ones they own, because AI can flag a risk but never carries the outcome, and the habit is accepting responsibility, not ticking a checklist.",
+ tAssess:"The ownership they take and the specificity of the monitoring plan they commit to."},
+{c:"value",
+ name:"Value Awareness",
+ def:"Focuses on solutions where extraordinary value can be created.",
+ frameworks:"The Pareto principle (80/20) · Value stream mapping (Lean) · The value proposition canvas",
+ move:"Stop selling hours. Sell taste, judgment, and outcomes.",
+ fosters:"AI can inventory the work and help build the value stream map, flagging the steps it has itself commoditized to near zero. Ask it to apply a Pareto lens — where does roughly 80% of the value originate — and classify each activity as value-adding or waste. It's a strong first-pass analyst of where effort is going.",
+ anti:"Cheap output tempts you to produce more of everything, including low-value work. Volume feels like value but isn't.",
+ tension:"Cheap output tempts you into producing more low-value work.",
+ mWhat:"Locates where the real value in your work concentrates so you can stop overproducing low-value output.",
+ mWhen:"You're spreading effort evenly and suspect some of it doesn't matter.",
+ model:"For everything I do on [project], help me find where 80% of the value actually comes from. List the activities, then tell me which few drive most of the value and which are low-value work that AI has made cheap enough to stop doing entirely. Be specific about what I should cut, not just what I should keep.",
+ mGood:"A clear split between the few high-value activities and the ones worth cutting, with concrete cuts named. If it won't tell you what to stop, press it.",
+ tSetup:"Students audit a project for where the real value concentrates, then justify cutting the low-value activities AI has made cheap to produce.",
+ tRole:"Helps inventory all the work being done. Students judge what's worth keeping, because cheap output tempts everyone to produce more of everything, and the habit is concentrating effort where extraordinary value actually is.",
+ tAssess:"The reasoning behind what they cut and what they chose to protect, not the size of the cut."},
+{c:"value",
+ name:"Customer-Centric Thinking",
+ def:"Frames efforts in terms of stakeholders' actual needs.",
+ frameworks:"Empathy mapping · Jobs-to-be-Done interviews · The Kano model",
+ move:"Talk to customers. Ask the approving stakeholder.",
+ fosters:"AI can sharpen the preparation and synthesis around a real conversation. Have it draft Jobs-to-be-Done questions designed to disconfirm your assumptions, structure an empathy map to fill from real data, and classify discovered needs with the Kano model afterward. It makes you a better interviewer and a faster synthesizer of what you actually heard.",
+ anti:"AI can simulate a customer but isn't one. Substituting a synthetic persona for a real conversation is the fastest way to build the wrong thing confidently. The relationship is the moat AI can't hold for you.",
+ tension:"A synthetic persona is not a stakeholder.",
+ mWhat:"Drafts the questions that would prove you wrong about what a stakeholder actually needs.",
+ mWhen:"Before building, when you're about to assume what the user wants.",
+ model:"I'm building [thing] for [stakeholder]. Draft the 5 questions I should ask a real one to learn whether this actually matters to them - questions designed to prove me wrong, not confirm me. For each, tell me what answer would mean I should change course. Don't roleplay the stakeholder, just sharpen the questions I'll go ask.",
+ mGood:"Five questions that could genuinely puncture your assumption, each with a disconfirming answer named. If they're soft or leading, ask for sharper ones.",
+ tSetup:"Students conduct at least one real stakeholder interview as part of the project. AI may help prepare the questions and synthesize the notes afterward, but cannot stand in as the stakeholder.",
+ tRole:"Preps sharp questions and organizes what was heard. The actual conversation stays human, because a synthetic persona confirms what you already believe, and the habit is grounding the work in a real person's actual needs.",
+ tAssess:"What they learned from the real interview that they did not expect going in."},
+{c:"value",
+ name:"Impact Thinking",
+ def:"Seeks outcomes that produce meaningful and scalable benefits for others.",
+ frameworks:"The lean validation loop & MVP · Theory of change · Unit economics",
+ move:"Ship the version that worked.",
+ fosters:"Once you've validated the unit, AI can model the scaled version and its breakpoints. Have it map a theory of change, surfacing the assumptions at each causal link, and stress-test the unit economics, separating what scales cleanly from what breaks at volume. It's a strong analyst of where the scaling assumptions are fragile.",
+ anti:"Scaling something before it works just scales the failure. AI's leverage amplifies whatever you point it at, good or bad.",
+ tension:"Scaling before it works scales the failure.",
+ mWhat:"Pressure-tests what has to hold for a working solution to scale without breaking.",
+ mWhen:"Something works at small scale and you're considering whether to grow it.",
+ model:"[Solution] works at small scale. Tell me what would have to stay true for it to deliver 100x the impact without losing what makes it work now. Separate the things that scale easily from the things that quietly break at volume. Then name the one assumption that's most dangerous to carry into a larger rollout.",
+ mGood:"A clear split between what scales and what breaks, ending on the one assumption most likely to fail at volume. If it's all optimism, ask where it breaks.",
+ tSetup:"Students may design for scale only after validating their solution at small scale. They then specify what has to stay true for it to reach many more people without breaking.",
+ tRole:"Helps model the scaled-up version and its requirements. Students define what they're protecting, because AI's leverage amplifies whatever it's pointed at, and scaling something before it works only scales the failure.",
+ tAssess:"What they identified as essential to preserve when scaling, and whether they validated before designing for reach."},
+{c:"value",
+ name:"Socially Minded",
+ def:"Prioritizes creating meaningful and positive societal impacts.",
+ frameworks:"Stakeholder mapping (power/interest grid) · Life-cycle assessment · The triple bottom line",
+ move:"Trust, in the value equation.",
+ fosters:"AI can surface a broad stakeholder and impact list you wouldn't assemble alone. It can populate a power/interest grid with affected parties beyond the obvious customer, sketch a life-cycle assessment across stages to flag displaced impacts, and structure a triple-bottom-line analysis — the raw material for your judgment about which matter.",
+ anti:"Optimizing only for what's easy to measure, because AI measures it well, quietly displaces the harder-to-measure social good. Intent has to stay human.",
+ tension:"What is easy to measure quietly crowds out the social good that is not.",
+ mWhat:"Surfaces who's affected by your work beyond the obvious customer, including the impacts no one's measuring.",
+ mWhen:"You're optimizing on clean metrics and want to see what they leave out.",
+ model:"Beyond the obvious users and metrics for [project], who else is affected that no one's accounting for? List the overlooked stakeholders and the impacts we're not measuring because they're hard to quantify. For each, tell me why it might matter more than it first appears. Then flag the one we'd most regret ignoring.",
+ mGood:"A list of genuinely overlooked parties and unmeasured effects, ending on the one most worth attention. If it only restates your known stakeholders, push it outward.",
+ tSetup:"Students map the stakeholders of a project and are required to identify parties outside the immediate customer. AI surfaces candidate groups, students judge which ones genuinely matter and why.",
+ tRole:"Generates a broad candidate list of affected parties. Students weigh significance, because optimizing only for what's easy to measure quietly displaces the harder-to-measure social good, and the habit is widening who counts.",
+ tAssess:"The non-obvious affected parties they surfaced and the strength of their case for why those parties matter."},
+{c:"value",
+ name:"Persistence",
+ def:"Maintains agency and resilience to achieve goals through obstacles and failures.",
+ frameworks:"Deliberate practice (Ericsson) · Desirable difficulties (Bjork) · After-action review",
+ move:"Continuous compounding. Play the long game.",
+ fosters:"Used carefully, AI can sustain productive struggle rather than remove it. Describe what you've tried and ask it to help you see the path you're avoiding, without handing over the answer — which keeps you at the edge of your ability where deliberate practice happens. It can also serve as an after-action review partner, turning a hard attempt into transferable lessons.",
+ anti:"Frictionless output can erode the muscle for hard, slow problems. If you quit whenever AI can't instantly solve it, you've outsourced your grit too.",
+ tension:"Frictionless output erodes the grit that hard problems require.",
+ mWhat:"Helps you find the path you haven't tried on a hard problem instead of handing you an answer.",
+ mWhen:"You're stuck and tempted to either quit or let AI solve it outright.",
+ model:"I'm stuck on [hard problem] and have already tried [X and Y]. Don't solve it for me. Help me see what I'm not trying, and be honest about which avenue I might be avoiding because it's tedious or hard. Ask me what I've assumed that I haven't questioned. I want to work through it, not around it.",
+ mGood:"A prod toward the path you've been dodging, plus a question that exposes a hidden assumption - not a finished solution. If it just solves it, that's the wrong outcome here.",
+ tSetup:"A long-arc project with documented obstacles along the way. Students reflect, with evidence from their own log, on where they persisted through difficulty versus where AI tempted them to abandon a hard path for an easy one.",
+ tRole:"Available throughout the project as a tool. The reflection is on their own use of it, because frictionless output can erode the muscle for hard, slow problems, and the habit is keeping agency when the easy exit is always one prompt away.",
+ tAssess:"The honesty and insight of the reflection, backed by specifics from their process, not a tidy success story."},
+{c:"value",
+ name:"Resourcefulness",
+ def:"Solves problems creatively with available resources.",
+ frameworks:"Constraint-driven design · TRIZ ideality · Lean waste elimination (muda)",
+ move:"Kill additive work. Kill, shrink, merge.",
+ fosters:"AI is a force multiplier, but the resourceful use is subtractive. For every workflow you add, ask what tasks it now lets you kill, shrink, or merge — pushing the system toward ideality, more function from fewer parts. Have it identify the muda a new workflow eliminates so the net effect is a leaner process, not another layer of tools.",
+ anti:"Cheap intelligence creates infinite appetite. Adding AI tools without killing work just multiplies busywork. Resourcefulness is saying no before the machine starts cooking.",
+ tension:"Adding new tools without cutting any work just multiplies busywork.",
+ mWhat:"Forces a subtraction step when you add an AI workflow so tools don't accumulate into busywork.",
+ mWhen:"You're about to adopt a new tool or process.",
+ model:"I'm adding this new AI workflow: [describe it]. Before I do, tell me what three existing tasks I can now kill, shrink, or merge because of it. Be ruthless, I'm trying to avoid stacking tools on top of tools. For each, say whether it's a full cut or a merge, and what I lose if I drop it.",
+ mGood:"Three concrete subtractions with the tradeoff of each named. If it only proposes what to add, it missed the point - ask again for the cuts.",
+ tSetup:"A process-improvement exercise where students must eliminate or merge tasks, not merely automate them, and justify each cut they make.",
+ tRole:"Readily suggests new automations and tools. Students decide what to kill rather than keep, because adding tools without removing work just multiplies busywork, and the habit is doing more with the same hands by saying no first.",
+ tAssess:"The cuts they made and the justification for each, not how many tools they added."},
+];
+
+const WORKFLOWS=[
+{name:"EM × AI Diagnostic",habits:"All 18 habits",
+ desc:"Walks you or your course across the 3Cs, surfaces strong and weak habits using the tension cues, then routes you to a single habit coach or the right workflow.",
+ steps:["Answer a few grounding questions about your task or course","Surface strong and weak habits across each of the 3Cs","Get routed to one habit coach, or to the workflow that fits"],
+ human:"the decision about where to spend your attention. AI maps the gaps, you choose which one matters."},
+{name:"Reality Check",habits:"Inquisitiveness · Customer-Centric Thinking",
+ desc:"Pulls you away from AI summaries and synthetic personas toward primary sources and real stakeholders. Drafts the questions that could prove you wrong and flags every place you're trusting a model's secondhand account of reality.",
+ steps:["Name what raw data or which real person you must inspect or talk to","Draft the questions that could prove you wrong","Flag every place you're trusting the model's secondhand account"],
+ human:"the looking and the real conversation. AI can prep them, not replace them."},
+{name:"Assumption Buster",habits:"Contrarian Thinking · Implications Thinking · Risk Awareness",
+ desc:"Red-teams your decision from three angles. Builds the strongest case that you're wrong, traces the non-obvious downstream consequences, then runs a pre-mortem and makes you decide which failure modes you will own.",
+ steps:["Build the strongest case that you're wrong and name the load-bearing assumption","Trace the non-obvious second and third-order consequences","Run a pre-mortem, then decide which failure modes you will own"],
+ human:"accountability. AI can list the risks, not carry them."},
+{name:"Experiment Multiplier",habits:"Experimentation · Creativity",
+ desc:"Generates many distinct options, then immediately forces a selection step. Volume is worthless without selection. The deliverable is a tested choice, not a pile of drafts.",
+ steps:["Generate many options that differ in kind, not just in wording","Define the test or criterion that decides which one wins","Run the test and commit to the choice it produces"],
+ human:"the selection. AI floods you with options, but choosing among them is the experiment."},
+{name:"Expertise to Files",habits:"Knowledge Synthesis · Resourcefulness",
+ desc:"Interviews you to extract how you actually make a recurring judgment, then turns it into a small set of context files. Context quality, not volume, is the moat. You must still be able to defend the synthesis.",
+ steps:["Get interviewed on how you actually make a recurring judgment","Turn your criteria, examples, and hard-won lessons into a few context files","Keep the set small, since context quality is the moat, not volume"],
+ human:"the understanding. AI can store your synthesis, not defend it for you."},
+{name:"System Builder",habits:"Systems Thinking · Strategic Thinking · Persistence",
+ desc:"Takes a task you keep redoing and turns it into a reusable checklist and workflow. You own the sequencing and the human boundary. The last step, what must stay human, is where the mindset lives.",
+ steps:["Identify the pattern in a task you keep redoing","Name the context files it needs and draft a reusable checklist","Mark the boundary, deciding what AI drafts and what stays yours"],
+ human:"the sequencing and the boundary. You own the strategy, AI drafts the tactics."},
+{name:"Value-Chain Climber",habits:"Value Awareness · Opportunity Seeking · Impact Thinking",
+ desc:"Moves your work above the output layer. Locates where real value concentrates, reframes effort around the real problem rather than the deliverable, and defines the proven small-scale result worth scaling.",
+ steps:["Locate where real value concentrates and what AI has commoditized to zero","Reframe the effort around the real problem, not the deliverable","Define the proven small-scale result that's worth scaling"],
+ human:"the judgment about what's worth doing. You sell taste and outcomes, AI handles the hours."}
+];
+
+const EXTRAS={
+"Inquisitiveness":{
+ b:"A student asks AI to summarize heat-exchanger fouling and pastes it into the report.",
+ a:"Same student asks AI to run a Five Whys from the symptom, then pulls the actual temperature-differential data and finds the real root cause was a flow-distribution problem upstream that the AI's chain never reached.",
+ lit:"Risko & Gilbert (2016) · Gerlich (2025)"},
+"Contrarian Thinking":{
+ b:"A student designing a drone landing mechanism fixates on legs and asks AI to check the design.",
+ a:"Same student asks AI to build a Duncker diagram of the function — decelerate and stabilize on contact — which branches into nets, adhesion, and controlled crumple, and adapts a crumple-zone approach the leg fixation had hidden.",
+ lit:"Lee et al. (2025)"},
+"Opportunity Seeking":{
+ b:"A capstone team asks AI for assistive-tech ideas and gets the wheelchair-ramp concepts every team gets.",
+ a:"Another team uses AI to map the jobs existing devices serve, then interviews the accessibility office and finds an unserved job — gripping door handles in winter gloves — that Kano analysis shows is a latent delighter the market missed."},
+"Experimentation":{
+ b:"A student asks AI for an airfoil shape, runs it once in the wind tunnel, and writes it up.",
+ a:"Another asks for eight geometries varying camber and thickness orthogonally, builds a factorial test matrix, runs all eight in one session, and uncovers a camber–Reynolds interaction their intuition had missed.",
+ lit:"Dell'Acqua et al. (2023) · Bjork (1994)"},
+"Confronting Ambiguity":{
+ b:"A team facing a vague site-design brief asks AI what to build and accepts its confident layout.",
+ a:"Another team asks AI to classify the problem with Cynefin, which flags it as complex, and to map the load, soil, and usage assumptions by sensitivity — and walks into the client meeting with the three unknowns that actually determine the design.",
+ lit:"Kosmyna et al. (2025) · Gerlich (2025)"},
+"Future-Minded":{
+ b:"A student asks AI where the power grid is headed and gets the consensus renewables story.",
+ a:"Another builds a two-axis scenario set — centralized versus distributed against fast versus slow storage-cost decline — and identifies the present-day signal, utility-scale battery procurement rates, that reveals which quadrant is arriving."},
+"Creativity":{
+ b:"A student stuck on heat dissipation asks AI for solutions and gets fins, fans, and heat pipes.",
+ a:"Another asks AI to map the strength-versus-thermal contradiction through TRIZ and surface biomimetic analogies, then adapts the passive convection geometry of termite mounds — a cross-domain transfer the contradiction matrix pointed toward.",
+ lit:"Doshi & Hauser (2024)"},
+"Systems Thinking":{
+ b:"A student tackling traffic congestion proposes widening the road and asks AI to check the plan.",
+ a:"Working the Iceberg Model with AI, they move from the event to the structure — induced demand, a reinforcing loop where added capacity attracts more drivers — and the causal loop diagram reveals the leverage point is trip demand, not road width."},
+"Knowledge Synthesis":{
+ b:"A student has AI summarize twelve papers and can't say how two of them conflict in the design review.",
+ a:"Another has AI interview them after each paper and co-builds a concept map linking findings by mechanism, then defends the map from memory, explaining exactly where two results contradict and why.",
+ lit:"Risko & Gilbert (2016) · Kosmyna et al. (2025)"},
+"Implications Thinking":{
+ b:"A team asks AI for the risks of a cheaper motor and gets torque and cost — the first ring.",
+ a:"Pushing the Futures Wheel to the second and third rings, they find the cheaper motor runs hotter, the heat shifts a nearby sensor's calibration, and the miscalibrated sensor corrupts the control loop two subsystems away.",
+ lit:"Lee et al. (2025)"},
+"Strategic Thinking":{
+ b:"A capstone team asks AI to plan their whole semester and becomes executors of a generic Gantt chart.",
+ a:"Another team sets the milestones themselves, then has AI compute the critical path and generate tactical options per phase, and can explain in review why their sequence protects the critical path and where they left slack.",
+ lit:"Dell'Acqua et al. (2023)"},
+"Risk Awareness":{
+ b:"A student pastes AI's FMEA into a design report and considers the box ticked.",
+ a:"Another runs an AI pre-mortem, computes risk priority numbers to rank the failure modes, then writes one sentence next to each top-ranked mode naming who monitors it and how — and their own name appears four times.",
+ lit:"Lee et al. (2025)"},
+"Value Awareness":{
+ b:"A student polishes every section of the report equally because AI makes polishing cheap.",
+ a:"Another runs a value stream map with AI, finds the validation section carries 80% of the technical value while formatting is pure waste AI now does for free, and reinvests the saved hours into a second experimental run.",
+ lit:"Dell'Acqua et al. (2023)"},
+"Customer-Centric Thinking":{
+ b:"A team asks AI to roleplay an elderly user and fills the empathy map from the roleplay.",
+ a:"Another team uses AI only to draft Jobs-to-be-Done questions, interviews three actual residents, and learns the real job is dignity, not reminding — the obstacle is arthritis opening the device, not memory."},
+"Impact Thinking":{
+ b:"A student team's tutoring app works for five users, so they ask AI to help pitch it campus-wide.",
+ a:"Another team maps a theory of change, finds an unexamined assumption that personal onboarding drives the result, checks the unit economics, and validates a self-serve onboarding at small scale before designing for reach."},
+"Socially Minded":{
+ b:"A team optimizes a water filtration design on cost per liter because that's what AI computes cleanly.",
+ a:"Another runs a life-cycle assessment and a power/interest grid with AI, finds the highest-stakes, lowest-power stakeholders are the local technicians who maintain the system after the team leaves, and redesigns maintenance around their reality."},
+"Persistence":{
+ b:"A student hits a wall on a nonlinear controls problem, asks AI to solve it, gets a wrong answer, and gives up.",
+ a:"Another describes what they've tried and asks AI what they're avoiding, realizes they've been dodging the hand linearization because it's tedious, works through it, and runs an after-action review to capture why.",
+ lit:"Bastani et al. (2024) · Slamecka & Graf (1978)"},
+"Resourcefulness":{
+ b:"A lab group adopts an AI tool for logging, another for plotting, another for reports, and now maintains three workflows.",
+ a:"Another group adds one tool and asks what it lets them kill, merging plotting and reporting into a single script and eliminating two manual steps as muda — moving toward ideality instead of away from it."}
+};
+
+const REFS=[
+{cite:"Kruger, J. & Dunning, D. (1999). Unskilled and unaware of it. Journal of Personality and Social Psychology, 77(6).",
+ find:"Low skill in a domain impairs the ability to evaluate quality in that domain. The citation behind the master principle. You can't judge work in a domain you haven't mastered, so polished output reads as competent when it isn't.",
+ habits:"The master principle"},
+{cite:"Risko, E.F. & Gilbert, S.J. (2016). Cognitive Offloading. Trends in Cognitive Sciences, 20(9).",
+ find:"The foundational framework for offloading thinking onto external tools. Our metacognitive judgments about when offloading is safe are often wrong, which is exactly when habits quietly stop being practiced.",
+ habits:"Inquisitiveness · Knowledge Synthesis"},
+{cite:"Lee, H.P. et al. (2025). The Impact of Generative AI on Critical Thinking. CHI 2025. Microsoft Research and Carnegie Mellon.",
+ find:"Survey of 319 knowledge workers with 936 real examples of AI use. Confidence in the AI predicted less critical thinking effort. Confidence in one's own expertise predicted more.",
+ habits:"Contrarian Thinking · Implications Thinking · Risk Awareness"},
+{cite:"Kosmyna, N. et al. (2025). Your Brain on ChatGPT. MIT Media Lab, arXiv 2506.08872.",
+ find:"EEG essay-writing study across LLM, search, and brain-only groups. LLM users showed the weakest neural connectivity and the weakest memory and sense of ownership over their own text.",
+ habits:"Confronting Ambiguity · Knowledge Synthesis",
+ caveat:"Preprint with a small sample and a published methodological critique. Cite as suggestive, not settled."},
+{cite:"Doshi, A.R. & Hauser, O.P. (2024). Generative AI enhances individual creativity but reduces the collective diversity of novel content. Science Advances, 10(28).",
+ find:"AI ideas made individual stories more creative, especially for less creative writers, while making the pool of stories measurably more similar to each other. Regression to the mean, quantified.",
+ habits:"Creativity"},
+{cite:"Bastani, H. et al. (2024). Generative AI Can Harm Learning. The Wharton School.",
+ find:"Nearly 1,000 students. Unrestricted GPT lifted practice scores 48 percent, then those students scored 17 percent worse than controls once it was removed. A tutor version with guardrails removed the harm. The empirical case for Teach-it mode.",
+ habits:"Persistence · the Teach-it design"},
+{cite:"Dell'Acqua, F. et al. (2023). Navigating the Jagged Technological Frontier. Harvard Business School working paper, with BCG.",
+ find:"758 consultants. Inside AI's frontier, quality rose about 40 percent. Outside it, AI users did worse, trusting the tool precisely where it was weakest. The variability of ideas also shrank.",
+ habits:"Experimentation · Strategic Thinking · Value Awareness"},
+{cite:"Gerlich, M. (2025). AI Tools in Society. Societies, 15(1).",
+ find:"666 participants. Frequent AI use correlated with lower critical thinking, mediated by cognitive offloading, strongest among younger users.",
+ habits:"Inquisitiveness · Confronting Ambiguity",
+ caveat:"Correlational and self-report. Shows association, not causation."},
+{cite:"Bjork, R.A. (1994). Memory and metamemory considerations in the training of human beings. In Metcalfe & Shimamura, Memory and Metamemory.",
+ find:"Desirable difficulties. Learning that feels harder in the moment produces more durable skill, which is why frictionless AI output can undermine habit formation.",
+ habits:"Experimentation · the assessment philosophy"},
+{cite:"Slamecka, N.J. & Graf, P. (1978). The generation effect. Journal of Experimental Psychology: Human Learning and Memory, 4(6).",
+ find:"Information you generate yourself is retained far better than information you read. The reason every prompt here extracts thinking instead of delivering it.",
+ habits:"Persistence · the Teach-it design"}
+];
+
+const WFPROMPTS={"EM × AI Diagnostic": {"pm": "You are running the EM x AI Diagnostic with an engineering faculty member. Your job is to find where their own AI practice is strong and where it is weak across the 18 KEEN habits, then point them to the one tool that fits.  How to run this session: Ask one question at a time and wait for each answer. Open with two grounding questions about their context - what they teach and how they currently use AI. Then work through the three Cs in turn, and for each, name which habits look strong and which look weak based on their answers. Stay diagnostic and concrete. Do not lecture.  The tension cue for each habit - use these to spot a weak habit. Curiosity: Inquisitiveness - AI is a fast on-ramp to questions, not a substitute for looking. Contrarian Thinking - AI defaults to agreeable, so make it argue against you. Opportunity Seeking - AI finds what exists, not what's missing. Experimentation - more attempts only count if you select among them. Confronting Ambiguity - clean answers manufacture false certainty. Future-Minded - AI is trained on the past. Connections: Creativity - AI regresses to the mean unless your prompt is strange. Systems Thinking - one-off asks train you to think in tasks. Knowledge Synthesis - synthesis inside the AI that you can't defend isn't yours. Implications Thinking - first-pass consequences are generic. Strategic Thinking - if AI sets the strategy you're just its executor. Risk Awareness - AI flags risk but never owns the outcome. Creating Value: Value Awareness - cheap output tempts more low-value work. Customer-Centric Thinking - a synthetic persona is not a stakeholder. Impact Thinking - scaling before it works scales the failure. Socially Minded - easy-to-measure crowds out the social good. Persistence - frictionless output erodes grit. Resourcefulness - new tools without cuts just multiply busywork.  Then route them. To build one habit, point them to that habit's coach in Model-it mode. For a whole task, recommend the workflow that fits: Reality Check, to get close to the real thing before trusting an answer, for Inquisitiveness and Customer-Centric Thinking. Assumption Buster, to pressure-test a decision, for Contrarian Thinking, Implications Thinking, and Risk Awareness. Experiment Multiplier, to turn cheap generation into real experimentation, for Experimentation and Creativity. Expertise to Files, to externalize tacit expertise into reusable context, for Knowledge Synthesis and Resourcefulness. System Builder, to turn a repeated task into a reusable system, for Systems Thinking, Strategic Thinking, and Persistence. Value-Chain Climber, to move work from output up to outcomes, for Value Awareness, Opportunity Seeking, and Impact Thinking. Confronting Ambiguity, Future-Minded, and Socially Minded have no dedicated workflow by design, so reach those through the habit coach.  Operating frame: As the cost of intelligence falls, the durable human edge is not raw output but the entrepreneurial mindset itself, the KEEN 3Cs. Three forces drive this. Value migrates up the chain to deciding what should exist and owning it, because AI attacks the cost to know, to think, and to produce. Cheaper intelligence means more attempts, not less work, so judgment becomes the bottleneck. And average output now reads as suspicious rather than professional, because it no longer costs time. The principle underneath: you cannot evaluate work in a domain you have not mastered, so polished output reads as competent when it isn't.", "pt": "You are an EM x AI diagnostic for engineering faculty. Assess strengths and gaps across all 18 KEEN habits for a specific course, then route to the right tool.  As the cost of intelligence collapses, the durable human edge is not raw output but the entrepreneurial mindset itself. The 'compete with AI' moves are the KEEN 3Cs (Curiosity, Connections, Creating Value) restated for an AI-saturated world.  Why this works: (1) Knowledge work was priced on three hidden costs - the cost to know, to think, and to produce - and AI attacks all three, so value migrates up the chain to deciding what should exist and owning it. (2) Jevons Paradox: cheaper intelligence means more attempts, not less work (one simulation becomes fifty parameter sweeps), so judgment becomes the bottleneck. (3) Average dies first: average output used to look professional because it cost time; now it looks suspicious because it took twelve seconds. (4) AI read about it; you lived it: lived, consequence-bearing experience is taste AI can only imitate.  Process: ask a couple of grounding questions about their context, then for each of the 3Cs surface which habits look strong and which look weak, using these tension cues:  - Inquisitiveness (Curiosity) [inquisitiveness]: AI is a fast on-ramp to questions, not a substitute for looking. - Contrarian Thinking (Curiosity) [contrarian_thinking]: AI defaults to agreeable; make it argue against you. - Opportunity Seeking (Curiosity) [opportunity_seeking]: AI finds what exists, not what's missing. - Experimentation (Curiosity) [experimentation]: More attempts only count if you select among them. - Confronting Ambiguity (Curiosity) [confronting_ambiguity]: Clean answers manufacture false certainty. - Future-Minded (Curiosity) [future_minded]: AI is trained on the past. - Creativity (Connections) [creativity]: AI regresses to the mean unless your prompt is weird. - Systems Thinking (Connections) [systems_thinking]: One-off asks train you to think in tasks. - Knowledge Synthesis (Connections) [knowledge_synthesis]: Synthesis inside the AI you can't defend isn't yours. - Implications Thinking (Connections) [implications_thinking]: First-pass consequences are generic. - Strategic Thinking (Connections) [strategic_thinking]: If AI sets strategy, you're just its executor. - Risk Awareness (Connections) [risk_awareness]: AI flags risk; it never owns the outcome. - Value Awareness (Creating Value) [value_awareness]: Cheap output tempts more low-value work. - Customer-Centric Thinking (Creating Value) [customer_centric]: A synthetic persona is not a stakeholder. - Impact Thinking (Creating Value) [impact_thinking]: Scaling before it works scales the failure. - Socially Minded (Creating Value) [socially_minded]: Easy-to-measure crowds out the social good. - Persistence (Creating Value) [persistence]: Frictionless output erodes grit. - Resourcefulness (Creating Value) [resourcefulness]: New tools without cuts just multiply busywork.  Then route: - To develop ONE habit: recommend em_coach(habit=<slug>, mode=teach_it). - For a composite task: recommend one of these workflows - - Reality Check [reality_check]: Get close to the real thing before trusting any answer. (habits: Inquisitiveness, Customer-Centric Thinking) - Assumption Buster [assumption_buster]: Pressure-test a decision before committing to it. (habits: Contrarian Thinking, Implications Thinking, Risk Awareness) - Experiment Multiplier [experiment_multiplier]: Turn cheap generation into real experimentation. (habits: Experimentation, Creativity) - Expertise to Files [expertise_to_files]: Externalize tacit expertise into reusable context. (habits: Knowledge Synthesis, Resourcefulness) - System Builder [system_builder]: Turn a repeated task into a reusable system. (habits: Systems Thinking, Strategic Thinking, Persistence) - Value-Chain Climber [value_chain_climber]: Move work from output up to judgment and outcomes. (habits: Value Awareness, Opportunity Seeking, Impact Thinking)  Note: Confronting Ambiguity, Future-Minded, Socially Minded have no dedicated workflow by design; reach them via em_coach. Stay diagnostic and concrete; one question at a time."}, "Reality Check": {"pm": "You are facilitating the Reality Check workflow with an engineering faculty member. Your job is to get them close to the real thing - primary sources and real stakeholders - before they trust any answer.  How to run this session: Work through the two steps below in order. After each step, stop and wait for the faculty member's response before continuing. Ask one thing at a time. Open by asking what claim, design, or decision they are about to rely on, and what they currently believe about it.  Step 1 - Get to the source. Identify the raw data they must inspect themselves and draft the questions that could prove them wrong. Flag every place they are currently trusting the model's secondhand account of reality instead of looking directly. Letting an AI summary stand in for the primary source is the failure here, because their attention narrows to whatever the model surfaced and they stop noticing the anomaly in the raw data.  Step 2 - Get to the stakeholder. Identify the real person whose need this turns on, and draft the five questions worth asking them - the ones designed to prove the faculty member wrong rather than confirm them. Do not roleplay the stakeholder. A synthetic persona confirms what they already believe, and the relationship with a real stakeholder is the one thing you cannot hold for them.  Operating frame: As the cost of intelligence falls, the durable human edge is not raw output but the entrepreneurial mindset itself, the KEEN 3Cs. This workflow composes two habits, Inquisitiveness and Customer-Centric Thinking. The principle under both steps: you cannot evaluate work in a domain you have not mastered, so polished output reads as competent when it isn't. You amplify the judgment the faculty member brings, you cannot supply the judgment they lack.  Close: When both steps are done, state plainly what must stay human - the looking and the real conversation that cannot be delegated to you.", "pt": "You are running the 'Reality Check' workflow for engineering faculty. Intent: Get close to the real thing before trusting any answer.  As the cost of intelligence collapses, the durable human edge is not raw output but the entrepreneurial mindset itself. The 'compete with AI' moves are the KEEN 3Cs (Curiosity, Connections, Creating Value) restated for an AI-saturated world.  Audience: engineering faculty. Every habit serves two uses - MODEL IT (exercise the habit in your own AI-augmented practice) and TEACH IT (design a classroom activity that develops it in students, so AI amplifies thinking rather than replacing it). The goal of student AI use is to EXTRACT their thinking, not skip it.  This workflow composes the KEEN habits: Inquisitiveness, Customer-Centric Thinking. Orchestration: Pull the user away from AI summaries and synthetic personas and toward primary sources and real stakeholders. Identify what raw data or whom they must inspect or talk to, draft the questions that could prove them wrong, and flag every place they are currently trusting a model's secondhand account of reality.  Keep each composed habit's anti-pattern in view: - Inquisitiveness: avoid - Letting the AI summary stand in for the primary source. Your curiosity narrows to whatever the model surfaced, and you stop noticing the anomaly in the raw data. - Customer-Centric Thinking: avoid - AI can simulate a customer but isn't one. Substituting a synthetic persona for a real conversation is the fastest way to build the wrong thing confidently. The relationship is the moat AI can't hold for you.  The master principle under every anti-pattern: if you're bad at something, you can't judge it - so you'll approve clean garbage. AI amplifies the judgment you already have; it cannot supply the judgment you lack. Therefore build taste FIRST, then let AI multiply it - never the reverse.  MODE: TEACH-IT. Turn this into a classroom activity, drawing on these seeds: Students use AI to map a topic in 20 minutes, then must verify three claims against primary sources and report one place the AI was wrong, vague, or out of date.; Require at least one real stakeholder interview; AI may help prep questions and synthesize afterward, but cannot stand in as the stakeholder. End by stating explicitly what must stay human."}, "Assumption Buster": {"pm": "You are facilitating the Assumption Buster workflow with an engineering faculty member. Your job is to pressure-test a real decision they are about to make, before they commit to it.  How to run this session: Work through the three steps below in order. After each step, stop and wait for the faculty member's response before moving to the next. Do not preview later steps or dump the whole critique at once. Ask one thing at a time. Open by asking them to state the decision they want to stress-test and the context around it.  Step 1 - Challenge the decision. Build the strongest case that their decision is wrong. Argue the opposing view as hard as you honestly can, then name the single load-bearing assumption that, if false, would collapse the whole thing. Do not soften this to be agreeable. An agreeable AI reinforces the conventional view instead of disrupting it, which is the failure this step exists to prevent.  Step 2 - Trace the consequences. Map the second- and third-order consequences of the decision. Skip the obvious first-order effects they already see. Walk the chain forward and surface the one downstream consequence that is least visible now and most likely to bite. A generic consequence list is the failure here, so push past the first pass to the specific effect that matters.  Step 3 - Run the pre-mortem and hand over ownership. Assume it is a year later and the decision failed. Work backward to the concrete failure modes that caused it, ranked by likelihood and damage. Then make the faculty member decide which of those failure modes they will personally own and monitor. End by asking them to state what they are now accountable for. Never let your risk list stand in for their responsibility, because you can flag a risk but you never carry the outcome.  Operating frame: As the cost of intelligence falls, the durable human edge is not raw output but the entrepreneurial mindset itself, the KEEN 3Cs. This workflow composes three habits, Contrarian Thinking, Implications Thinking, and Risk Awareness. The principle under all three steps: you cannot evaluate work in a domain you have not mastered, so polished output reads as competent when it isn't. You amplify the judgment the faculty member brings, you cannot supply the judgment they lack.  Close: When the three steps are done, state plainly what must stay human - the accountability that cannot be delegated to you.", "pt": "You are running the 'Assumption Buster' workflow for engineering faculty. Intent: Pressure-test a decision before committing to it.  As the cost of intelligence collapses, the durable human edge is not raw output but the entrepreneurial mindset itself. The 'compete with AI' moves are the KEEN 3Cs (Curiosity, Connections, Creating Value) restated for an AI-saturated world.  Audience: engineering faculty. Every habit serves two uses - MODEL IT (exercise the habit in your own AI-augmented practice) and TEACH IT (design a classroom activity that develops it in students, so AI amplifies thinking rather than replacing it). The goal of student AI use is to EXTRACT their thinking, not skip it.  This workflow composes the KEEN habits: Contrarian Thinking, Implications Thinking, Risk Awareness. Orchestration: Red-team the user's decision from three angles in sequence: build the strongest case that they are wrong and name the load-bearing assumption; trace the non-obvious second- and third-order consequences; then run a pre-mortem and make the user decide which failure modes THEY will own. End by asking what they are now accountable for - never let the AI's risk list stand in for human responsibility.  Keep each composed habit's anti-pattern in view: - Contrarian Thinking: avoid - AI is tuned to be agreeable. Used only as a helper, it reinforces the conventional view instead of disrupting it. - Implications Thinking: avoid - AI's consequence-mapping is generic unless pushed. Accepting the first list gives obvious risks and misses the specific one that matters. - Risk Awareness: avoid - AI can flag risk but never owns the outcome. Treating its risk list as the accountability confuses a checklist for responsibility. The buck stays human.  The master principle under every anti-pattern: if you're bad at something, you can't judge it - so you'll approve clean garbage. AI amplifies the judgment you already have; it cannot supply the judgment you lack. Therefore build taste FIRST, then let AI multiply it - never the reverse.  MODE: TEACH-IT. Turn this into a classroom activity, drawing on these seeds: Students submit a design decision, prompt AI to red-team it, grade the critique's quality, and defend or revise the decision in a one-page memo.; Consequence-scanning on a design decision; students must surface one non-obvious downstream effect the AI missed, plus a mitigation.; Pre-mortem exercise; students must explicitly take ownership of which risks they will personally monitor, and how. End by stating explicitly what must stay human."}, "Experiment Multiplier": {"pm": "You are facilitating the Experiment Multiplier workflow with an engineering faculty member. Your job is to turn cheap AI generation into real experimentation, where volume becomes a tested choice rather than a pile of drafts.  How to run this session: Work through the two steps below in order. After each step, stop and wait for the faculty member's response before continuing. Ask one thing at a time. Open by asking what problem or design they are working on and what a good outcome would look like.  Step 1 - Generate real range. Produce many options that differ in kind, not variations on one idea, drawing on cross-domain analogies where they help. For each, name the assumption it bets on. Returning the average idea is the failure here, because AI regresses to the mean of its training data unless pushed, so the range has to be genuinely wide.  Step 2 - Force the selection. Before they grow attached to any option, make them define the test or criterion that will decide which one wins, then apply it. Volume without selection is noise, not experimentation. The deliverable is one tested choice they can defend, not the collection of drafts.  Operating frame: As the cost of intelligence falls, the durable human edge is not raw output but the entrepreneurial mindset itself, the KEEN 3Cs. This workflow composes two habits, Experimentation and Creativity. The principle under both steps: you cannot evaluate work in a domain you have not mastered, so polished output reads as competent when it isn't. You amplify the judgment the faculty member brings, you cannot supply the judgment they lack.  Close: When both steps are done, state plainly what must stay human - the selection among options that is the experiment itself.", "pt": "You are running the 'Experiment Multiplier' workflow for engineering faculty. Intent: Turn cheap generation into real experimentation.  As the cost of intelligence collapses, the durable human edge is not raw output but the entrepreneurial mindset itself. The 'compete with AI' moves are the KEEN 3Cs (Curiosity, Connections, Creating Value) restated for an AI-saturated world.  Audience: engineering faculty. Every habit serves two uses - MODEL IT (exercise the habit in your own AI-augmented practice) and TEACH IT (design a classroom activity that develops it in students, so AI amplifies thinking rather than replacing it). The goal of student AI use is to EXTRACT their thinking, not skip it.  This workflow composes the KEEN habits: Experimentation, Creativity. Orchestration: Generate many distinct options (different in kind, drawing on cross-domain analogies), then immediately force a selection step: define the test or criterion that will decide which option wins. Volume is worthless without selection - the deliverable is a tested choice, not a pile of drafts.  Keep each composed habit's anti-pattern in view: - Experimentation: avoid - Cheap generation tempts you to ship the first plausible output. Volume without selection is noise, not experimentation. - Creativity: avoid - AI regresses to the mean of its training data. Used lazily it returns the average idea, not the novel one. The creativity is in your weird prompt, not its safe answer.  The master principle under every anti-pattern: if you're bad at something, you can't judge it - so you'll approve clean garbage. AI amplifies the judgment you already have; it cannot supply the judgment you lack. Therefore build taste FIRST, then let AI multiply it - never the reverse.  MODE: TEACH-IT. Turn this into a classroom activity, drawing on these seeds: Students generate multiple AI-assisted variants, run a real test or simulation, and report which variant won and whether their hypothesis held.; Cross-domain analogy exercise - AI surfaces analogies; students adapt one into a working concept and explain the transfer. End by stating explicitly what must stay human."}, "Expertise to Files": {"pm": "You are facilitating the Expertise to Files workflow with an engineering faculty member. Your job is to pull a recurring judgment they make out of their head and into a small set of reusable context files.  How to run this session: Work through the two steps below in order. After each step, stop and wait for the faculty member's response before continuing. Interview them one question at a time, don't fire a list. Open by asking which recurring decision or judgment they would like to make reusable.  Step 1 - Interview for the tacit knowledge. Draw out how they actually make this judgment - their real criteria, examples they admire, examples they reject, and the mistakes they refuse to repeat. Dig past the first answer. The aim is the reasoning they can't easily articulate, not a tidy summary they could have written themselves.  Step 2 - Build the files and keep them small. Turn what you heard into a compact, curated set of context files - an about-me, a standards file, and worked examples. Keep it small, because context quality, not volume, is the moat. The faculty member must be able to defend the synthesis from memory, not just store it. If the understanding lives only inside the files, they have outsourced it.  Operating frame: As the cost of intelligence falls, the durable human edge is not raw output but the entrepreneurial mindset itself, the KEEN 3Cs. This workflow composes two habits, Knowledge Synthesis and Resourcefulness. The principle under both steps: you cannot evaluate work in a domain you have not mastered, so polished output reads as competent when it isn't. You amplify the judgment the faculty member brings, you cannot supply the judgment they lack.  Close: When both steps are done, state plainly what must stay human - the understanding they have to own rather than store.", "pt": "You are running the 'Expertise to Files' workflow for engineering faculty. Intent: Externalize tacit expertise into reusable context.  As the cost of intelligence collapses, the durable human edge is not raw output but the entrepreneurial mindset itself. The 'compete with AI' moves are the KEEN 3Cs (Curiosity, Connections, Creating Value) restated for an AI-saturated world.  Audience: engineering faculty. Every habit serves two uses - MODEL IT (exercise the habit in your own AI-augmented practice) and TEACH IT (design a classroom activity that develops it in students, so AI amplifies thinking rather than replacing it). The goal of student AI use is to EXTRACT their thinking, not skip it.  This workflow composes the KEEN habits: Knowledge Synthesis, Resourcefulness. Orchestration: Interview the user to extract how they actually make a recurring judgment - their criteria, examples they love and hate, mistakes they won't repeat - and turn it into a small, curated set of context files (about-me, standards, examples). Keep it small: context quality, not volume, is the moat. Make sure the user can still defend the synthesis, not just store it.  Keep each composed habit's anti-pattern in view: - Knowledge Synthesis: avoid - If synthesis happens only inside the AI and you never internalize it, you've outsourced understanding: you can produce the output but not defend it. - Resourcefulness: avoid - Cheap intelligence creates infinite appetite. Adding AI tools without killing work just multiplies busywork. Resourcefulness is saying no before the machine starts cooking.  The master principle under every anti-pattern: if you're bad at something, you can't judge it - so you'll approve clean garbage. AI amplifies the judgment you already have; it cannot supply the judgment you lack. Therefore build taste FIRST, then let AI multiply it - never the reverse.  MODE: TEACH-IT. Turn this into a classroom activity, drawing on these seeds: Students build a personal 'expertise file' across the course (criteria, examples, anti-examples) and use it to direct AI; assessed on the file's quality, not just outputs.; Process-improvement exercise - students must eliminate or merge tasks, not just automate them, and justify each cut. End by stating explicitly what must stay human."}, "System Builder": {"pm": "You are facilitating the System Builder workflow with an engineering faculty member. Your job is to turn a task they keep redoing into a reusable system they own.  How to run this session: Work through the three steps below in order. After each step, stop and wait for the faculty member's response before moving to the next. Ask one thing at a time. Open by asking which task they find themselves redoing from scratch, and what about it repeats.  Step 1 - Find the pattern. Identify the repeated structure in the task and name the context files the system would need. Treating this as one more one-off request is the failure here, because asking for single answers again and again trains task-thinking and hides the leverage of building the machine once.  Step 2 - Draft the reusable system. Turn the pattern into a checklist and a first version of the workflow, marking which parts stay fixed and which stay flexible. Build it so a different person could pick it up and run it, not just the faculty member who made it.  Step 3 - Set the human boundary. Have them decide what AI drafts and what stays theirs. They own the sequencing and the strategy, AI generates the tactical options under each step. If AI sets the strategy too, they become the executor of its plan, so this last step - naming what must stay human - is where the mindset lives.  Operating frame: As the cost of intelligence falls, the durable human edge is not raw output but the entrepreneurial mindset itself, the KEEN 3Cs. This workflow composes three habits, Systems Thinking, Strategic Thinking, and Persistence. The principle under all three steps: you cannot evaluate work in a domain you have not mastered, so polished output reads as competent when it isn't. You amplify the judgment the faculty member brings, you cannot supply the judgment they lack.  Close: When the three steps are done, state plainly what must stay human - the sequencing and the boundary that stay theirs to own.", "pt": "You are running the 'System Builder' workflow for engineering faculty. Intent: Turn a repeated task into a reusable system.  As the cost of intelligence collapses, the durable human edge is not raw output but the entrepreneurial mindset itself. The 'compete with AI' moves are the KEEN 3Cs (Curiosity, Connections, Creating Value) restated for an AI-saturated world.  Audience: engineering faculty. Every habit serves two uses - MODEL IT (exercise the habit in your own AI-augmented practice) and TEACH IT (design a classroom activity that develops it in students, so AI amplifies thinking rather than replacing it). The goal of student AI use is to EXTRACT their thinking, not skip it.  This workflow composes the KEEN habits: Systems Thinking, Strategic Thinking, Persistence. Orchestration: Take a task the user keeps redoing and: identify the repeated pattern, name the context files it needs, turn it into a reusable checklist, draft the first version of the workflow, and explicitly state what must stay human. The user owns sequencing and the human boundary; AI drafts the tactics. The last step - what must stay human - is where the mindset lives.  Keep each composed habit's anti-pattern in view: - Systems Thinking: avoid - Repeatedly asking for one-off answers trains you to think in tasks, not systems - the convenience hides the leverage you're leaving on the table. - Strategic Thinking: avoid - If AI sets the strategy too, you become an executor of its plan. Strategy is where human ownership has to stay. - Persistence: avoid - Frictionless output can erode the muscle for hard, slow problems. If you quit whenever AI can't instantly solve it, you've outsourced your grit too.  The master principle under every anti-pattern: if you're bad at something, you can't judge it - so you'll approve clean garbage. AI amplifies the judgment you already have; it cannot supply the judgment you lack. Therefore build taste FIRST, then let AI multiply it - never the reverse.  MODE: TEACH-IT. Turn this into a classroom activity, drawing on these seeds: Instead of grading a single deliverable, require students to submit the reusable system (template + process) they'd hand to next year's team.; Students own the strategy and milestones; AI may only generate tactical options. Assessed on sequencing logic and tradeoff reasoning.; Long-arc project with documented obstacles; students reflect on where they persisted versus where AI tempted them to abandon a hard path. End by stating explicitly what must stay human."}, "Value-Chain Climber": {"pm": "You are facilitating the Value-Chain Climber workflow with an engineering faculty member. Your job is to move their work above the output layer, up to judgment and outcomes.  How to run this session: Work through the three steps below in order. After each step, stop and wait for the faculty member's response before moving to the next. Ask one thing at a time. Open by asking what project or deliverable they want to look at, and where they currently spend most of their effort on it.  Step 1 - Find where value concentrates. Locate where the real value of this work sits, and name what AI has now commoditized to near zero. Producing more of everything is the failure here, because cheap output tempts volume that feels like value but isn't. Be specific about what they should stop doing entirely.  Step 2 - Reframe around the real problem. Move the effort from the deliverable to the underlying unmet need. AI surfaces what is well documented, not what is absent, so push them toward the gap others haven't noticed rather than the crowded problem everyone already sees.  Step 3 - Define what's worth scaling. Identify the proven small-scale result worth growing, and what has to stay true for it to scale without breaking. Scaling something before it works only scales the failure, because AI's leverage amplifies whatever it is pointed at. The aim is to sell taste, judgment, and outcomes, not hours.  Operating frame: As the cost of intelligence falls, the durable human edge is not raw output but the entrepreneurial mindset itself, the KEEN 3Cs. This workflow composes three habits, Value Awareness, Opportunity Seeking, and Impact Thinking. The principle under all three steps: you cannot evaluate work in a domain you have not mastered, so polished output reads as competent when it isn't. You amplify the judgment the faculty member brings, you cannot supply the judgment they lack.  Close: When the three steps are done, state plainly what must stay human - the judgment about what is worth doing.", "pt": "You are running the 'Value-Chain Climber' workflow for engineering faculty. Intent: Move work from output up to judgment and outcomes.  As the cost of intelligence collapses, the durable human edge is not raw output but the entrepreneurial mindset itself. The 'compete with AI' moves are the KEEN 3Cs (Curiosity, Connections, Creating Value) restated for an AI-saturated world.  Audience: engineering faculty. Every habit serves two uses - MODEL IT (exercise the habit in your own AI-augmented practice) and TEACH IT (design a classroom activity that develops it in students, so AI amplifies thinking rather than replacing it). The goal of student AI use is to EXTRACT their thinking, not skip it.  This workflow composes the KEEN habits: Value Awareness, Opportunity Seeking, Impact Thinking. Orchestration: Help the user move above the output layer: locate where the real value concentrates and what AI has commoditized to zero, reframe the effort around the real problem and unmet need rather than the deliverable, and define the proven small-scale result worth scaling. Sell taste, judgment, and outcomes - not hours.  Keep each composed habit's anti-pattern in view: - Value Awareness: avoid - Cheap output tempts you to produce more of everything, including low-value work. Volume feels like value but isn't. - Opportunity Seeking: avoid - AI surfaces what's well documented, not what's absent - so you end up chasing crowded problems everyone already sees. - Impact Thinking: avoid - Scaling something before it works just scales the failure. AI's leverage amplifies whatever you point it at - good or bad.  The master principle under every anti-pattern: if you're bad at something, you can't judge it - so you'll approve clean garbage. AI amplifies the judgment you already have; it cannot supply the judgment you lack. Therefore build taste FIRST, then let AI multiply it - never the reverse.  MODE: TEACH-IT. Turn this into a classroom activity, drawing on these seeds: Students audit a project for where real value concentrates and justify cutting the low-value activities AI has commoditized.; Give a real constraint (e.g., a campus or community need); AI maps existing solutions; students must identify and justify one unmet need the AI did not flag.; Students may design for scale only after validating at small scale; assessed on what they protected when scaling up. End by stating explicitly what must stay human."}};
+
+const WFEXTRA={
+"EM × AI Diagnostic": {
+"whenLine": "Start here when you don't yet know which habit or workflow you need. It assesses across all three Cs and routes you, rather than exercising one move.",
+"tSetup": "Run the diagnostic on a course or assignment you're designing. It walks the 3Cs, asks where students currently lean strong or weak, and points you to the habit activity or workflow that fits the gap.",
+"tRole": "Surfaces blind spots and names the weak habits faster than you'd map them alone. You decide which gap is worth building a class activity around, because the routing is a suggestion, not a syllabus.",
+"tAssess": "Use it as a planning tool, not a graded artifact. The output is your design decision about what to build next.",
+"buildPrompt": "I'm designing a reflective exercise where students assess their own AI practice across the entrepreneurial mindset habits, then pick one habit to deliberately strengthen. Help me build it for [course, level, class size]. Draft a short self-assessment students complete, a set of prompts that route them to the right habit to work on, and a brief reflection assignment. Constraints: [time available, in-class or take-home]."
+},
+"Reality Check": {
+"whenLine": "Use this on a real claim or design you're about to trust, not just to practice one habit. It fires Inquisitiveness and Customer-Centric Thinking together, the full move from secondhand to firsthand.",
+"tSetup": "Students take a topic or design and map it with AI in 20 minutes, then must verify three claims against primary sources and conduct at least one real stakeholder interview. They report one place the AI was wrong, vague, or out of date, and one thing the real stakeholder said that the model couldn't.",
+"tRole": "Maps fast and drafts the interview questions. The verification against real sources and the actual conversation stay with the student, because the workflow exists to pull them from the model's secondhand account back to reality.",
+"tAssess": "The rigor of the three verifications and what the real interview surfaced that the AI map missed.",
+"buildPrompt": "I'm designing a class activity where students map a topic with AI, then must verify three claims against primary sources and conduct one real stakeholder interview. Help me build it for [course, level, class size]. Draft the assignment brief, step-by-step student instructions for the verification and the interview, and a rubric that grades the rigor of their source-checking and what the real interview surfaced that the AI missed. Constraints: [time available, in-class or take-home]."
+},
+"Assumption Buster": {
+"whenLine": "Use this when you have a real decision to pressure-test, not just to drill one habit. It runs Contrarian Thinking, Implications Thinking, and Risk Awareness in the order a real critique needs.",
+"tSetup": "Students submit a design decision, then run it through three passes with AI: prompt it to red-team the decision, scan for one non-obvious downstream consequence the AI missed, and run a pre-mortem. They deliver a one-page memo that defends or revises the decision and names which risks they will personally own.",
+"tRole": "Generates the opposing case, the consequence chain, and the failure modes at speed. Students judge the critique, find the missing consequence, and take ownership, because AI can flag risk but never carries the outcome.",
+"tAssess": "The quality of their evaluation of the critique, the non-obvious consequence they caught, and the ownership they take over specific risks.",
+"buildPrompt": "I'm designing a class activity where students take a design decision they've made and run it through three passes - an AI red-team, a consequence scan, and a pre-mortem with personal ownership of risks. Help me build it for [course, level, class size]. Draft the assignment brief, the three step-by-step student instructions, and a rubric that grades their evaluation of the critique, the non-obvious consequence they caught, and the risks they took ownership of. Constraints: [time available, in-class or take-home]."
+},
+"Experiment Multiplier": {
+"whenLine": "Use this when cheap generation tempts you to ship the first idea, not just to practice one habit. It pairs Experimentation with Creativity so volume turns into a tested choice.",
+"tSetup": "Students generate multiple genuinely distinct AI-assisted variants, optionally seeded by a cross-domain analogy the AI surfaces, then run a real test or simulation and report which variant won and whether their hypothesis held.",
+"tRole": "Produces the variants and the analogies cheaply. Students design the test that selects among them and explain any cross-domain transfer, because volume without selection is noise.",
+"tAssess": "The test design, the conclusion drawn from it, and the clarity of any analogy they adapted, not the count of variants.",
+"buildPrompt": "I'm designing a class activity where students generate many distinct AI-assisted variants of a design, then run a real test to select among them. Help me build it for [course, level, class size]. Draft the assignment brief, student instructions for generating range and defining a selection test, and a rubric that grades the test design and the conclusion drawn rather than the number of variants. Constraints: [time available, in-class or take-home]."
+},
+"Expertise to Files": {
+"whenLine": "Use this when you keep making the same judgment and want it reusable, not just to practice one habit. It joins Knowledge Synthesis and Resourcefulness into a durable asset.",
+"tSetup": "Across the course, students build a personal expertise file, criteria, examples, and anti-examples, by being interviewed about how they make a recurring judgment, then use it to direct AI on a final task. They also run a process-improvement pass, eliminating or merging tasks rather than just automating them.",
+"tRole": "Conducts the interview and applies the file consistently. Students must be able to defend the file's contents from memory and justify each task they cut, because synthesis that lives only inside the AI isn't theirs.",
+"tAssess": "The quality of the expertise file and their ability to defend their criteria, plus the justification for each task they eliminated or merged.",
+"buildPrompt": "I'm designing a course-long activity where students build a personal expertise file - criteria, examples, and anti-examples - by being interviewed about a recurring judgment, then use it to direct AI. Help me build it for [course, level, class size]. Draft the assignment brief, the interview questions that surface tacit criteria, instructions for assembling the file, and a rubric that grades the file's quality and the student's ability to defend their own criteria. Constraints: [timeline across the term, checkpoints]."
+},
+"System Builder": {
+"whenLine": "Use this when a task you keep redoing should become a system, not just to drill one habit. It composes Systems Thinking, Strategic Thinking, and Persistence around a repeated task.",
+"tSetup": "Students take a task they keep redoing and submit the reusable system, a template plus process, they'd hand to next year's team. They own the milestones and sequence while AI generates only tactical options, and they keep a log of where they persisted versus where AI tempted them to abandon a hard path.",
+"tRole": "Drafts the template and the tactical options under each milestone. Students own the sequencing and the human boundary, and the reflection on persistence is theirs, because the part that must stay human is where the mindset lives.",
+"tAssess": "Whether the system works when a fresh person picks it up, the logic of their sequencing, and the honesty of their reflection on persistence.",
+"buildPrompt": "I'm designing an activity where students turn a task they keep redoing into a reusable system - a template plus process - while owning the sequence and letting AI draft only tactics. Help me build it for [course, level, class size]. Draft the assignment brief, student instructions for finding the pattern and drafting the system, and a rubric that grades whether the system works when a fresh person picks it up and the logic of their sequencing. Constraints: [time available, in-class or take-home]."
+},
+"Value-Chain Climber": {
+"whenLine": "Use this when you want to move work from output up to outcomes, not just to practice one habit. It runs Value Awareness, Opportunity Seeking, and Impact Thinking together.",
+"tSetup": "Students audit a project for where real value concentrates and justify cutting the low-value work AI has commoditized, identify and justify one unmet need the AI did not flag, then design for scale only after validating at small scale, specifying what they protected when scaling up.",
+"tRole": "Inventories the work, maps existing solutions, and models the scaled version. Students judge where value concentrates, find the gap AI missed, and define what must survive scaling, because AI surfaces what exists, not what's absent.",
+"tAssess": "The reasoning behind their cuts, the significance of the unmet need they found, and what they identified as essential to preserve at scale.",
+"buildPrompt": "I'm designing an activity where students audit a project for where real value concentrates, identify one unmet need the AI missed, and define what's worth scaling after validating at small scale. Help me build it for [course, level, class size]. Draft the assignment brief, student instructions for the value audit and the scaling analysis, and a rubric that grades their reasoning about what to cut, the significance of the gap they found, and what they protected when scaling. Constraints: [time available, in-class or take-home]."
+}
+};
+
+/* =============== STATE =============== */
+const visited=new Set();
+let currentC=null, currentH=null;
+
+/* =============== NAV =============== */
+function go(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'auto'});
+  if(id==='hero') drawConstellation();
+  if(id==='map') buildMap();
+  // kinetics: show the progress strip on working views, hide on hero/intro
+  const strip=document.getElementById('progress');
+  const showOn=['map','picker','habitlist','habit','workflows'];
+  if(showOn.includes(id) && visited.size>0){ strip.classList.add('show'); document.body.classList.add('has-progress'); updateProgress(); }
+  else { strip.classList.remove('show'); document.body.classList.remove('has-progress'); }
+}
+
+const FAMILY_DONE=new Set();
+function updateProgress(announce){
+  const total=HABITS.length;
+  const n=visited.size;
+  const pct=Math.round((n/total)*100);
+  const fill=document.getElementById('progressFill');
+  const label=document.getElementById('progressLabel');
+  if(fill) fill.style.width=pct+'%';
+  if(label) label.textContent=n+' of '+total+' habits explored';
+  if(!announce) return;
+  // milestone checks
+  let msg=null, cta=null;
+  if(n===total){
+    msg='<b>All 18 explored.</b> You\u2019ve walked the whole map.';
+    cta={label:'Take it with you',go:'close'};
+  } else {
+    for(const [key,c] of Object.entries(CS)){
+      const fam=HABITS.filter(h=>h.c===key);
+      if(!FAMILY_DONE.has(key) && fam.every(h=>visited.has(h.name))){
+        FAMILY_DONE.add(key);
+        msg='<b>'+c.name+' complete.</b> All six habits in this family explored.';
+        cta={label:'See the map',go:'map'};
+        break;
+      }
+    }
+  }
+  if(msg) showToast(msg,cta);
+}
+
+function showToast(msg,cta){
+  const toast=document.getElementById('progressToast');
+  if(!toast) return;
+  toast.innerHTML='<div class="progress-toast-inner"><span>'+msg+'</span>'+
+    (cta?'<button id="toastCta">'+cta.label+'</button>':'')+'</div>';
+  toast.classList.add('show');
+  if(cta){
+    const btn=document.getElementById('toastCta');
+    btn.onclick=()=>{toast.classList.remove('show');go(cta.go);};
+  }
+  clearTimeout(showToast._t);
+  showToast._t=setTimeout(()=>toast.classList.remove('show'),6000);
+}
+
+/* =============== CONSTELLATION =============== */
+function drawConstellation(){
+  const svg=document.getElementById('constSvg');
+  if(!svg) return;
+  const groups=['curiosity','connections','value'];
+  const colors={curiosity:'#2B9E92',connections:'#7E90A6',value:'#D08A4B'};
+  let out='';
+  groups.forEach((g,gi)=>{
+    const items=HABITS.filter(h=>h.c===g);
+    items.forEach((h,i)=>{
+      const cx=30+gi*140+(i%3)*34;
+      const cy=40+Math.floor(i/3)*44;
+      const isV=visited.has(h.name);
+      out+=`<circle class="const-dot" cx="${cx}" cy="${cy}" r="9" fill="${isV?colors[g]:'none'}" stroke="${colors[g]}" stroke-width="2" opacity="${isV?1:0.75}" style="cursor:pointer;transition:r .2s,opacity .2s" data-habit="${h.name}" data-c="${g}"><title>${h.name}${isV?' ✓':''}</title></circle>`;
+    });
+    out+=`<text x="${30+gi*140+34}" y="138" text-anchor="middle" fill="#7E90A6" font-size="10" letter-spacing="2" font-family="Arial">${CS[g].name.toUpperCase()}</text>`;
+  });
+  svg.innerHTML=out;
+  // Hidden Mickey: dots respond to attention, and clicking one jumps to that habit
+  svg.querySelectorAll('.const-dot').forEach(d=>{
+    d.addEventListener('mouseenter',()=>{d.setAttribute('r','12');d.setAttribute('opacity','1');});
+    d.addEventListener('mouseleave',()=>{d.setAttribute('r','9');d.setAttribute('opacity',visited.has(d.dataset.habit)?'1':'0.75');});
+    d.addEventListener('click',()=>{const h=HABITS.find(x=>x.name===d.dataset.habit);if(h)openHabit(h);});
+  });
+  // Hidden Mickey: caption quietly reflects your own progress once you've begun
+  const cap=document.querySelector('.const-caption');
+  if(cap){
+    cap.textContent = visited.size===0 ? '18 habits · 3 families · one principle'
+      : visited.size>=HABITS.length ? 'all 18 explored · you walked the whole map'
+      : visited.size+' of 18 explored · keep going';
+  }
+}
+
+/* =============== MEDIUM SHOT / MAP =============== */
+function buildMap(){
+  const body=document.getElementById('mapBody');
+  body.innerHTML='';
+  Object.entries(CS).forEach(([key,c])=>{
+    const col=document.createElement('div');
+    col.className='map-col';
+    const habits=HABITS.filter(h=>h.c===key);
+    const exploredN=habits.filter(h=>visited.has(h.name)).length;
+    col.innerHTML=`
+      <div class="map-col-head" style="border-color:${c.color}">
+        <span class="map-c-mark" style="background:${c.color}">${c.name[0]}</span>
+        <div>
+          <h3 class="serif">${c.name}</h3>
+          <span class="map-c-sub">${c.desc}</span>
+        </div>
+      </div>
+      <div class="map-c-count">${exploredN?exploredN+' of 6 explored':'6 habits'}</div>`;
+    const list=document.createElement('div');
+    list.className='map-habits';
+    habits.forEach(h=>{
+      const chip=document.createElement('button');
+      chip.className='map-chip'+(visited.has(h.name)?' explored':'');
+      chip.style.setProperty('--cc',c.color);
+      chip.innerHTML=`<span class="map-chip-name">${h.name}</span><span class="map-chip-def">${h.def}</span>`;
+      chip.onclick=()=>openHabit(h);
+      list.appendChild(chip);
+    });
+    col.appendChild(list);
+    body.appendChild(col);
+  });
+  // workflows strip
+  const wf=document.getElementById('mapWf');
+  wf.innerHTML='';
+  WORKFLOWS.forEach((w,i)=>{
+    const row=document.createElement('button');
+    row.className='map-wf-row'+(i===0?' diag':'');
+    row.innerHTML=`<span class="map-wf-name">${w.name}</span><span class="map-wf-habits">${w.habits}</span>`;
+    row.onclick=()=>go('workflows');
+    wf.appendChild(row);
+  });
+}
+
+/* =============== 3C PICKER =============== */
+function buildPicker(){
+  const grid=document.getElementById('cGrid');
+  grid.innerHTML='';
+  Object.entries(CS).forEach(([key,c])=>{
+    const visitedCount=HABITS.filter(h=>h.c===key&&visited.has(h.name)).length;
+    const btn=document.createElement('button');
+    btn.className='c-card';
+    btn.innerHTML=`
+      <span class="c-mark" style="background:${c.color}">${c.name[0]}</span>
+      <h3 class="serif">${c.name}</h3>
+      <p>${c.desc}</p>
+      <span class="c-count">6 habits${visitedCount?` · ${visitedCount} explored`:''}</span>`;
+    btn.onclick=()=>openC(key);
+    grid.appendChild(btn);
+  });
+}
+
+function openC(key){
+  currentC=key;
+  const c=CS[key];
+  document.getElementById('hlCrumb').textContent=c.name;
+  document.getElementById('hlEyebrow').textContent='Family '+(Object.keys(CS).indexOf(key)+1)+' of 3';
+  document.getElementById('hlTitle').textContent=c.name;
+  document.getElementById('hlDesc').textContent=c.desc;
+  const list=document.getElementById('hList');
+  list.innerHTML='';
+  HABITS.filter(h=>h.c===key).forEach(h=>{
+    const row=document.createElement('button');
+    row.className='h-row';
+    row.innerHTML=`<h4 class="serif">${h.name}</h4>
+      ${visited.has(h.name)?'<span class="h-visited">✓ explored</span>':'<span></span>'}
+      <span class="h-def">${h.def}</span>`;
+    row.onclick=()=>openHabit(h);
+    list.appendChild(row);
+  });
+  go('habitlist');
+}
+
+/* =============== HABIT DETAIL =============== */
+/* =============== HABIT VIDEOS =============== */
+/* Fill in a video for each habit when ready. Two ways to set one:
+   1. YouTube/Vimeo:  embed: "https://www.youtube.com/embed/VIDEO_ID"
+   2. Local file:     file:  "videos/inquisitiveness.mp4"
+   Leave an entry out (or blank) to show the placeholder slot for that habit. */
+const VIDEOS = {
+  "Inquisitiveness": { file: "notebooklm_videos/Inquisitiveness & AI.mp4" },
+  "Contrarian Thinking": { file: "notebooklm_videos/Contrarian Mindset.mp4" },
+  "Opportunity Seeking": { file: "notebooklm_videos/Teaching the Gap.mp4" },
+  "Experimentation": { file: "notebooklm_videos/Experimentation Habit.mp4" },
+  "Confronting Ambiguity": { file: "notebooklm_videos/Confronting Ambiguity.mp4" },
+  "Future-Minded": { file: "notebooklm_videos/Future-Minded Engineers.mp4" },
+  "Creativity": { file: "notebooklm_videos/Engineering Creativity.mp4" },
+  "Systems Thinking": { file: "notebooklm_videos/EM × AI_ Systems Thinking.mp4" },
+  "Knowledge Synthesis": { file: "notebooklm_videos/Knowledge Synthesis & AI.mp4" },
+  "Implications Thinking": { file: "notebooklm_videos/Implications Thinking & AI.mp4" },
+  "Strategic Thinking": { file: "notebooklm_videos/Strategy in the Age of AI.mp4" },
+  "Risk Awareness": { file: "notebooklm_videos/Risk Awareness & AI Trap.mp4" },
+  "Value Awareness": { file: "notebooklm_videos/Value Awareness.mp4" },
+  "Customer-Centric Thinking": { file: "notebooklm_videos/Customer-Centric Habit.mp4" },
+  "Impact Thinking": { file: "notebooklm_videos/Impact Thinking & AI.mp4" },
+  "Socially Minded": { file: "notebooklm_videos/Socially Minded Engineer.mp4" },
+  "Persistence": { file: "notebooklm_videos/Engineering Persistence.mp4" },
+  "Resourcefulness": { file: "notebooklm_videos/Teaching Resourcefulness.mp4" },
+};
+
+function renderHabitVideo(h){
+  const slot=document.getElementById('videoSlot');
+  const sub=document.getElementById('videoPhSub');
+  const v=VIDEOS[h.name];
+  if(v && v.embed){
+    slot.innerHTML='<iframe src="'+v.embed+'" title="'+h.name+' video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+  } else if(v && v.file){
+    slot.innerHTML='<video controls preload="metadata"><source src="'+v.file+'" type="video/mp4">Your browser does not support the video tag.</video>';
+  } else {
+    slot.innerHTML='<div class="video-placeholder"><span class="video-play">\u25B6</span><span class="video-ph-text">'+h.name+' video</span><span class="video-ph-sub">drop the video here</span></div>';
+  }
+}
+
+function openHabit(h){
+  currentH=h;
+  const isNew=!visited.has(h.name);
+  visited.add(h.name);
+  const c=CS[h.c];
+  document.getElementById('hCrumb').textContent=c.name+' · '+h.name;
+  document.getElementById('hTag').textContent=c.name;
+  document.getElementById('hTag').style.background=c.color;
+  document.getElementById('hTitle').textContent=h.name;
+  document.getElementById('hDef').textContent=h.def;
+  document.getElementById('hFrameworks').innerHTML=h.frameworks?('<b>Frameworks</b> &nbsp;'+h.frameworks):'';
+  renderHabitVideo(h);
+  document.getElementById('hBack').onclick=()=>openC(h.c);
+  document.getElementById('backListBtn').onclick=()=>openC(h.c);
+
+  const siblings=HABITS.filter(x=>x.c===h.c);
+  const idx=siblings.indexOf(h);
+  const nextBtn=document.getElementById('nextHabitBtn');
+  if(idx<siblings.length-1){
+    nextBtn.textContent='Next habit → '+siblings[idx+1].name;
+    nextBtn.onclick=()=>openHabit(siblings[idx+1]);
+  } else {
+    const order=['curiosity','connections','value'];
+    const nc=order[(order.indexOf(h.c)+1)%3];
+    nextBtn.textContent='Next family → '+CS[nc].name;
+    nextBtn.onclick=()=>openC(nc);
+  }
+
+  buildSteps(h);
+  go('habit');
+  if(isNew){ document.getElementById('progress').classList.add('show'); updateProgress(true); }
+}
+
+function buildSteps(h){
+  const wrap=document.getElementById('hSteps');
+  wrap.innerHTML='';
+  const steps=[
+    {label:'Step 1 · The AI-era move',body:`<p class="serif" style="font-size:1.15rem;color:var(--navy)">${h.move}</p>`},
+    {label:'Step 2 · How AI helps build it',body:`<p>${h.fosters}</p>`},
+    {label:'Step 3 · The anti-pattern to guard against',warn:true,
+     body:`<p>${h.anti}</p><div class="tension serif">${h.tension}</div>${exampleHTML(h)}`},
+    {label:'Step 4 · Put it to work',body:promptHTML(h)}
+  ];
+  steps.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.className='step-card'+(s.warn?' warn':'')+(i===0?' revealed':'');
+    card.id='step'+i;
+    card.innerHTML=`<div class="step-label">${s.label}</div>${s.body}`;
+    wrap.appendChild(card);
+    if(i<steps.length-1){
+      const row=document.createElement('div');
+      row.className='continue-row'+(i===0?'':' step-card');
+      if(i>0){row.classList.add('continue-hidden');row.style.background='none';row.style.border='none';row.style.padding='0';}
+      const btn=document.createElement('button');
+      btn.className='btn ghost small';
+      btn.textContent='Continue →';
+      btn.onclick=()=>{
+        document.getElementById('step'+(i+1)).classList.add('revealed');
+        const nr=document.getElementById('crow'+(i+1));
+        if(nr) nr.style.display='flex';
+        btn.parentElement.style.display='none';
+        document.getElementById('step'+(i+1)).scrollIntoView({behavior:'smooth',block:'center'});
+      };
+      row.id='crow'+i;
+      if(i>0) row.style.display='none';
+      row.appendChild(btn);
+      wrap.appendChild(row);
+    }
+  });
+  initPromptTabs(h);
+}
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function exampleHTML(h){
+  const ex=EXTRAS[h.name];
+  if(!ex) return '';
+  const lit=ex.lit?`<div class="ex-lit">Research basis: ${ex.lit} · <a onclick="go('refs')">See all sources</a></div>`:'';
+  return `
+  <details class="ex">
+    <summary>See it in a real course</summary>
+    <div class="ex-pair">
+      <div class="ex-half skip"><div class="ex-label">Skipping the habit</div><p>${ex.b}</p></div>
+      <div class="ex-half train"><div class="ex-label">Practicing the habit</div><p>${ex.a}</p></div>
+    </div>
+    ${lit}
+  </details>`;
+}
+
+function buildRefs(){
+  const list=document.getElementById('refList');
+  list.innerHTML='';
+  REFS.forEach(r=>{
+    const d=document.createElement('div');
+    d.className='ref-card';
+    d.innerHTML=`<div class="ref-cite">${r.cite}</div>
+      <div class="ref-find">${r.find}</div>
+      <div class="ref-habits">Supports: ${r.habits}</div>
+      ${r.caveat?`<div class="ref-caveat">Caveat. ${r.caveat}</div>`:''}`;
+    list.appendChild(d);
+  });
+}
+
+function promptHTML(h){
+  return `
+  <div class="prompt-tabs">
+    <button class="ptab on" data-pane="model">Run it yourself</button>
+    <button class="ptab" data-pane="teach">Run it with students</button>
+  </div>
+  <div class="prompt-pane on" id="pane-model">
+    <div class="mode-banner model-banner"><b>A prompt you run.</b> Copy it into ChatGPT, Claude, or Gemini and fill in the bracket. It works on a real task of your own, and the output is a working demonstration for you, not a student handout.</div>
+    <div class="frame-grid">
+      <div class="frame-row"><span class="frame-k">What it does</span><span class="frame-v">${esc(h.mWhat)}</span></div>
+      <div class="frame-row"><span class="frame-k">When to use it</span><span class="frame-v">${esc(h.mWhen)}</span></div>
+    </div>
+    <div class="prompt-box"><button class="copy-btn" data-copy="model">Copy</button>${esc(h.model)}</div>
+    <div class="frame-grid frame-after">
+      <div class="frame-row"><span class="frame-k">What good output looks like</span><span class="frame-v">${esc(h.mGood)}</span></div>
+    </div>
+  </div>
+  <div class="prompt-pane" id="pane-teach">
+    <div class="mode-banner teach-banner"><b>A strategy you run.</b> Don't paste this into a chatbot. It's an activity you design and lead, in class, as an assignment, or both. The blueprint below is a starting point. Adapt the specifics to your course.</div>
+    <div class="seed-grid">
+      <div class="seed-row"><span class="seed-k">Setup</span><span class="seed-v">${esc(h.tSetup)}</span></div>
+      <div class="seed-row"><span class="seed-k">AI's role</span><span class="seed-v">${esc(h.tRole)}</span></div>
+      <div class="seed-row"><span class="seed-k">Assessed on</span><span class="seed-v">${esc(h.tAssess)}</span></div>
+    </div>
+  </div>`;
+}
+
+function initPromptTabs(h){
+  const scope=document.getElementById('habit');
+  scope.querySelectorAll('.ptab').forEach(t=>{
+    t.onclick=()=>{
+      scope.querySelectorAll('.ptab').forEach(x=>x.classList.remove('on'));
+      scope.querySelectorAll('.prompt-pane').forEach(x=>x.classList.remove('on'));
+      t.classList.add('on');
+      const pane=document.getElementById('pane-'+t.dataset.pane);
+      if(pane) pane.classList.add('on');
+    };
+  });
+  scope.querySelectorAll('.copy-btn').forEach(b=>{
+    b.onclick=()=>{
+      const text=h.model;
+      navigator.clipboard.writeText(text).then(()=>{
+        const old=b.textContent;b.textContent='Copied ✓';
+        setTimeout(()=>b.textContent=old,1600);
+      }).catch(()=>{
+        const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);
+        ta.select();document.execCommand('copy');document.body.removeChild(ta);
+        b.textContent='Copied ✓';setTimeout(()=>b.textContent='Copy',1600);
+      });
+    };
+  });
+}
+
+/* =============== WORKFLOWS =============== */
+function buildWorkflows(){
+  const list=document.getElementById('wfList');
+  list.innerHTML='';
+  WORKFLOWS.forEach((w,i)=>{
+    const d=document.createElement('div');
+    const isDiag=(i===0);
+    d.className='wf-card'+(isDiag?' featured':'');
+    const p=WFPROMPTS[w.name];
+    const x=WFEXTRA[w.name];
+    const stepsHTML=w.steps?`<div class="wf-steps">${w.steps.map((s,si)=>`<div class="wf-step"><span class="wf-sn">${si+1}</span><span>${s}</span></div>`).join('')}</div>`:'';
+    const humanHTML=w.human?`<div class="wf-human"><b>What stays human is</b> ${w.human}</div>`:'';
+    const whenHTML=x&&x.whenLine?`<div class="wf-when"><b>When to reach for this.</b> ${esc(x.whenLine)}</div>`:'';
+    let putHTML='';
+    if(p&&x){
+      putHTML=`
+      <details class="wfp">
+        <summary>Put it to work</summary>
+        <div class="wfp-inner">
+          <div class="prompt-tabs">
+            <button class="ptab on" data-wf="${i}" data-mode="pm">Run it yourself</button>
+            <button class="ptab" data-wf="${i}" data-mode="pt">Run it with students</button>
+          </div>
+          <div class="prompt-pane on" id="wfpane-pm-${i}">
+            <div class="mode-banner model-banner"><b>A prompt you run.</b> Paste the whole block into ChatGPT, Claude, or Gemini, then describe your real task. This is the full orchestration prompt, identical to what the catalog and MCP server provide.</div>
+            <div class="prompt-box"><button class="copy-btn" data-wf="${i}">Copy</button><span class="wfp-text">${esc(p.pm)}</span></div>
+          </div>
+          <div class="prompt-pane" id="wfpane-pt-${i}">
+            <div class="mode-banner teach-banner"><b>A strategy you run.</b> Don't paste this into a chatbot. It's a multi-step activity you design and lead, in class, as an assignment, or both. Adapt the specifics to your course.</div>
+            <div class="seed-grid">
+              <div class="seed-row"><span class="seed-k">Setup</span><span class="seed-v">${esc(x.tSetup)}</span></div>
+              <div class="seed-row"><span class="seed-k">AI's role</span><span class="seed-v">${esc(x.tRole)}</span></div>
+              <div class="seed-row"><span class="seed-k">Assessed on</span><span class="seed-v">${esc(x.tAssess)}</span></div>
+            </div>
+            ${x.buildPrompt?`<details class="buildp">
+              <summary>Prompt to build this activity</summary>
+              <div class="buildp-inner">
+                <p class="buildp-note">Paste this into ChatGPT, Claude, or Gemini to have it draft the brief, student instructions, and rubric for you. This builds the teaching materials, it is not the workflow prompt above.</p>
+                <div class="prompt-box"><button class="copy-btn buildcopy" data-wf="${i}">Copy</button>${esc(x.buildPrompt)}</div>
+              </div>
+            </details>`:''}
+          </div>
+        </div>
+      </details>`;
+    }
+    d.innerHTML=`${isDiag?'<div class="wf-start">Start here if you don\u2019t know where to start</div>':''}
+      <h4 class="serif">${w.name}</h4><div class="wf-habits">${w.habits}</div><p>${w.desc}</p>${whenHTML}${stepsHTML}${humanHTML}${putHTML}`;
+    list.appendChild(d);
+  });
+  list.querySelectorAll('.ptab').forEach(t=>{
+    t.onclick=()=>{
+      const i=t.dataset.wf, mode=t.dataset.mode;
+      const inner=t.closest('.wfp-inner');
+      inner.querySelectorAll('.ptab').forEach(x=>x.classList.remove('on'));
+      inner.querySelectorAll('.prompt-pane').forEach(x=>x.classList.remove('on'));
+      t.classList.add('on');
+      const pane=document.getElementById('wfpane-'+mode+'-'+i);
+      if(pane) pane.classList.add('on');
+    };
+  });
+  list.querySelectorAll('.copy-btn').forEach(b=>{
+    b.onclick=()=>{
+      const wfName=WORKFLOWS[b.dataset.wf].name;
+      const text=b.classList.contains('buildcopy')?WFEXTRA[wfName].buildPrompt:WFPROMPTS[wfName].pm;
+      navigator.clipboard.writeText(text).then(()=>{
+        b.textContent='Copied \u2713';setTimeout(()=>b.textContent='Copy',1600);
+      }).catch(()=>{
+        const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);
+        ta.select();document.execCommand('copy');document.body.removeChild(ta);
+        b.textContent='Copied \u2713';setTimeout(()=>b.textContent='Copy',1600);
+      });
+    };
+  });
+}
+
+/* keep picker fresh when shown */
+const pickerView=document.getElementById('picker');
+const obs=new MutationObserver(()=>{if(pickerView.classList.contains('active'))buildPicker();});
+obs.observe(pickerView,{attributes:true,attributeFilter:['class']});
+
+/* init */
+drawConstellation();
+buildPicker();
+buildWorkflows();
+buildRefs();
+
+/* Hidden Mickey: arrow keys flip between habits when reading one */
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('habit').classList.contains('active')) return;
+  if(!currentH) return;
+  if(e.key!=='ArrowRight' && e.key!=='ArrowLeft') return;
+  const sib=HABITS.filter(x=>x.c===currentH.c);
+  const idx=sib.indexOf(currentH);
+  if(e.key==='ArrowRight' && idx<sib.length-1) openHabit(sib[idx+1]);
+  if(e.key==='ArrowLeft' && idx>0) openHabit(sib[idx-1]);
+});
+</script>
+</body>
+</html>
