@@ -26,9 +26,24 @@ The old repo/site name was `em-ai-field-guide-videos`; it was renamed to `emaifi
 
 - `em-ai-walkthrough.html`: the full single-page interactive field guide. Most content, CSS, and JavaScript live inline here.
 - `index.html`: redirect entry point for GitHub Pages.
+- `codewords.md`: short commands such as `BOOT`, `WRAP`, `SHIP`, `CHECK`, `VIDEO`, `ALIGN`, and `NOTE` for future sessions.
 - `notebooklm_videos/`: contains the 18 MP4 explainer videos generated from NotebookLM.
 - `README.md`: short project summary.
 - `Screenshot_Video_NotAligned.png`: a user-provided screenshot showing a previous video alignment issue. It is intentionally untracked unless the user asks to commit it.
+
+## Session Code Words
+
+The project has a codeword system in `codewords.md`.
+
+Useful examples:
+
+- `BOOT`: read the context files, inspect git status/log, and summarize the current state.
+- `WRAP`: finish cleanly, commit/push if appropriate, check Pages, and update context.
+- `SHIP`: commit and publish site changes.
+- `CHECK`: verify the live site and layout.
+- `VIDEO`: work on the 18 NotebookLM video integrations.
+- `ALIGN`: focus on the video/text alignment issue.
+- `NOTE`: update project memory files.
 
 ## Current Video Integration
 
