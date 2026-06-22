@@ -445,6 +445,58 @@
   .wf-card .wf-habits{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--teal-dark);margin-bottom:8px;}
   .wf-card p{font-size:.93rem;color:var(--ink-soft);}
 
+  /* tools / use it live */
+  .status-pill{
+    display:inline-flex;align-items:center;gap:7px;margin-left:12px;
+    font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+    background:var(--cream-deep);border-radius:20px;padding:4px 11px;color:var(--ink-soft);
+    vertical-align:middle;
+  }
+  .status-dot{width:8px;height:8px;border-radius:50%;background:#C9A24B;flex-shrink:0;}
+  .status-pill.live .status-dot{background:#46A37A;box-shadow:0 0 0 3px rgba(70,163,122,.18);}
+  .status-pill.down .status-dot{background:#B5543F;}
+  .connect-grid{display:grid;grid-template-columns:1fr;gap:20px;margin-top:38px;}
+  .mcp-explain{margin-top:32px;background:var(--cream-deep);border-radius:10px;padding:24px 26px;}
+  .mcp-explain h3{font-family:Georgia,serif;font-weight:normal;font-size:1.25rem;color:var(--navy);margin-bottom:10px;}
+  .mcp-explain p{font-size:.95rem;color:var(--ink);margin-bottom:16px;max-width:660px;}
+  .mcp-assure{display:grid;gap:8px;}
+  .mcp-assure-item{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;color:var(--ink-soft);}
+  .mcp-check{color:var(--teal-dark);font-weight:bold;flex-shrink:0;}
+  @media(max-width:760px){.connect-grid{grid-template-columns:1fr;}}
+  .connect-card{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:24px 24px 20px;}
+  .connect-card h3{font-family:Georgia,serif;font-weight:normal;font-size:1.3rem;color:var(--navy);margin-bottom:10px;}
+  .connect-card p{font-size:.92rem;color:var(--ink-soft);margin-bottom:14px;}
+  .connect-card code{background:var(--cream-deep);border-radius:4px;padding:1px 6px;font-size:.85em;color:var(--navy);}
+  .connect-hint{margin-top:12px;margin-bottom:0;font-size:.88rem;}
+  .code-box{position:relative;background:var(--navy-deep);border-radius:8px;padding:16px;overflow:auto;}
+  .code-box pre{color:#CFE3DF;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem;line-height:1.5;white-space:pre;margin:0;}
+  .code-box .copy-btn{position:absolute;top:10px;right:10px;}
+  .tools-catalog{margin-top:50px;}
+  .catalog-h{font-family:Georgia,serif;font-weight:normal;font-size:1.6rem;color:var(--navy);margin-bottom:6px;}
+  .catalog-lede{font-size:.95rem;color:var(--ink-soft);max-width:640px;margin-bottom:24px;}
+  .catalog-group{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-dark);margin:28px 0 12px;}
+  .catalog-list{display:grid;gap:8px;}
+  .cap-row{
+    display:grid;grid-template-columns:1fr auto;gap:6px 16px;align-items:start;
+    background:var(--white);border:1px solid var(--line);border-radius:8px;padding:14px 16px;
+  }
+  .cap-main{min-width:0;}
+  .cap-names{display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;margin-bottom:4px;}
+  .cap-claude{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.86rem;color:var(--navy);font-weight:bold;}
+  .cap-gpt{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.76rem;color:var(--ink-soft);}
+  .cap-desc{font-size:.88rem;color:var(--ink-soft);}
+  .cap-params{font-size:.72rem;letter-spacing:.04em;color:var(--teal-dark);white-space:nowrap;text-align:right;padding-top:2px;}
+  @media(max-width:600px){.cap-row{grid-template-columns:1fr;}.cap-params{text-align:left;}}
+  .tools-foot{margin-top:46px;padding-top:24px;border-top:1px solid var(--line);text-align:center;}
+  .tools-foot p{font-family:Georgia,serif;font-size:1.2rem;color:var(--navy);max-width:560px;margin:0 auto 18px;}
+  .live-hook{
+    margin-top:14px;font-size:.84rem;color:var(--ink-soft);line-height:1.55;
+    background:var(--teal-soft);border-radius:7px;padding:11px 14px;
+  }
+  .live-hook code{background:var(--white);border-radius:4px;padding:1px 6px;font-size:.86em;color:var(--navy);font-family:ui-monospace,Menlo,Consolas,monospace;}
+  .live-hook a{color:var(--teal-dark);cursor:pointer;font-weight:bold;text-decoration:none;}
+  .live-hook a:hover{text-decoration:underline;}
+
   footer.site{
     background:var(--navy);color:#8FA2B8;text-align:center;
     padding:26px 24px;font-size:.8rem;letter-spacing:.04em;
@@ -705,8 +757,71 @@
   </div>
 </section>
 
+<!-- ===================== TOOLS / USE IT LIVE ===================== -->
+<section class="view" id="tools">
+  <div class="topbar">
+    <button class="brand" onclick="go('hero')">EM <b>×</b> AI</button>
+    <span class="crumb">Use it live</span>
+  </div>
+  <div class="wrap section-pad">
+    <button class="back-link" onclick="go('hero')">← Back to the guide</button>
+    <div class="eyebrow">From reading to running <span class="status-pill" id="mcpStatus"><span class="status-dot"></span><span id="mcpStatusText">checking server…</span></span></div>
+    <h2 class="head serif">Use this guide live, inside your assistant</h2>
+    <p class="lede">Everything in this guide is also a live tool. Connect EMxAI Studio once and the habits, prompts, and workflows become available on demand inside Claude or ChatGPT, always current, nothing to copy. The server is public, read-only, and stores nothing.</p>
+
+    <div class="mcp-explain">
+      <h3 class="serif">New to MCP? Here's the short version</h3>
+      <p>The Model Context Protocol is an open standard that lets an AI assistant connect to an outside server and pull in extra capabilities. Instead of pasting a long prompt every time, you connect this server once and the curated prompts appear inside the assistant, ready on demand.</p>
+      <div class="mcp-assure">
+        <div class="mcp-assure-item"><span class="mcp-check">✓</span> Read-only and stateless. It only ever returns text, prompts and reference content.</div>
+        <div class="mcp-assure-item"><span class="mcp-check">✓</span> No login, no account, nothing to install beyond one config line.</div>
+        <div class="mcp-assure-item"><span class="mcp-check">✓</span> Stores no data and cannot modify files, send messages, or act on your behalf.</div>
+      </div>
+    </div>
+
+    <div class="connect-grid">
+      <div class="connect-card">
+        <h3 class="serif">Connect in Claude</h3>
+        <p>Add this to your <code>claude_desktop_config.json</code>, then fully quit and reopen Claude. The prompts appear in the slash menu, type <code>/</code> to see them.</p>
+        <div class="code-box"><button class="copy-btn" data-copy="claude-config">Copy</button><pre id="claude-config">{
+  "mcpServers": {
+    "emxai-studio": {
+      "type": "http",
+      "url": "https://emxai-studio-mcp-production.up.railway.app/mcp"
+    }
+  }
+}</pre></div>
+        <p class="connect-hint">Then try <code>/em-list</code> to see the whole map, or <code>/em-diagnostic</code> to get routed.</p>
+      </div>
+      <div class="connect-card">
+        <h3 class="serif">Connect in ChatGPT</h3>
+        <p>Go to Settings, then Connectors, then Add MCP Server. Paste the endpoint URL, choose No Auth, and confirm. The capabilities appear as tools the assistant calls when asked.</p>
+        <div class="code-box"><button class="copy-btn" data-copy="endpoint-url">Copy</button><pre id="endpoint-url">https://emxai-studio-mcp-production.up.railway.app/mcp</pre></div>
+        <p class="connect-hint">Then ask, for example, <em>use the em_habit tool for Systems Thinking</em>.</p>
+      </div>
+    </div>
+
+    <div class="tools-catalog">
+      <div class="eyebrow">What you get · 13 capabilities</div>
+      <h3 class="serif catalog-h">The full toolset</h3>
+      <p class="catalog-lede">Every capability works on both platforms. In Claude it is a slash prompt with hyphens, in ChatGPT a tool with underscores. Both return identical content.</p>
+
+      <h4 class="catalog-group">The EM × AI Field Guide · 5 access points</h4>
+      <div id="catalogGuide" class="catalog-list"></div>
+
+      <h4 class="catalog-group">Teaching prompts · 8 specialists</h4>
+      <div id="catalogPrompts" class="catalog-list"></div>
+    </div>
+
+    <div class="tools-foot">
+      <p class="serif">The guide is the front door. The server is the same content, live where you work.</p>
+      <button class="btn ghost small" onclick="go('hero')">Back to the guide</button>
+    </div>
+  </div>
+</section>
+
 <footer class="site">
-  <b>The EM × AI Field Guide</b> · Built on the KEEN Habits of Entrepreneurial Mindset · <a onclick="go('refs')" style="color:var(--teal);cursor:pointer;text-decoration:none;">Research basis</a> · Works with ChatGPT, Claude, and Gemini
+  <b>The EM × AI Field Guide</b> · Built on the KEEN Habits of Entrepreneurial Mindset · <a onclick="go('refs')" style="color:var(--teal);cursor:pointer;text-decoration:none;">Research basis</a> · <a onclick="go('tools')" style="color:var(--teal);cursor:pointer;text-decoration:none;">Use it live</a> · Works with ChatGPT, Claude, and Gemini
 </footer>
 
 <script>
@@ -1513,6 +1628,7 @@ function promptHTML(h){
     <div class="frame-grid frame-after">
       <div class="frame-row"><span class="frame-k">What good output looks like</span><span class="frame-v">${esc(h.mGood)}</span></div>
     </div>
+    <div class="live-hook">Connected EMxAI Studio? Pull the always-current version with <code>/em-coach</code> in Claude, or ask ChatGPT to <em>use the em_coach tool for ${esc(h.name)}</em>. <a onclick="go('tools')">Set it up</a></div>
   </div>
   <div class="prompt-pane" id="pane-teach">
     <div class="mode-banner teach-banner"><b>A strategy you run.</b> Don't paste this into a chatbot. It's an activity you design and lead, in class, as an assignment, or both. The blueprint below is a starting point. Adapt the specifics to your course.</div>
@@ -1635,6 +1751,61 @@ drawConstellation();
 buildPicker();
 buildWorkflows();
 buildRefs();
+
+/* =============== TOOLS TAB =============== */
+const CAP_GUIDE=[
+  {c:"em-list",g:"em_list",d:"The full map — 3 families, all 18 habits with their one-line tensions, and the 7 workflows. Start here.",p:"—"},
+  {c:"em-habit",g:"em_habit",d:"Complete content for one habit: family, definition, frameworks, the AI-era move, how AI helps, the anti-pattern, the tension, and both modes.",p:"name"},
+  {c:"em-coach",g:"em_coach",d:"Just the Run-it-yourself paste-ready prompt for one habit.",p:"habit"},
+  {c:"em-workflow",g:"em_workflow",d:"A full multi-habit workflow: orchestration prompt, student blueprint, and build-an-activity meta-prompt.",p:"name"},
+  {c:"em-diagnostic",g:"em_diagnostic",d:"The routing diagnostic. Assesses your AI practice across all 3 Cs and points you to the right habit or workflow.",p:"—"}
+];
+const CAP_PROMPTS=[
+  {c:"aias-advisor",g:"aias_advisor",d:"AI Assessment Scale Advisor. Redesigns homework across a 5-level AIAS framework with student instructions, rubrics, and integrity safeguards.",p:"subject, level"},
+  {c:"eml-architect",g:"eml_architect",d:"EML Architect. Converts a traditional textbook problem into an Entrepreneurial Mindset Learning task while preserving technical rigor.",p:"em_habits, problems"},
+  {c:"interactive-builder-planning",g:"interactive_builder_planning",d:"Phase 1. Guides faculty through a planning blueprint for a privacy-safe, single-session educational web app.",p:"—"},
+  {c:"interactive-builder-coding",g:"interactive_builder_coding",d:"Phase 2. Turns that blueprint into a working single-file HTML prototype.",p:"—"},
+  {c:"autonomy-coach",g:"autonomy_coach",d:"Course Autonomy Coach. Embeds student autonomy using 20 proven strategies, with ready-to-use syllabus and rubric language.",p:"course_subject, course_level"},
+  {c:"engagement-opener",g:"engagement_opener",d:"Joyful Opener Designer. Builds a 3-minute classroom micro-experiment that sparks curiosity through cognitive dissonance or surprise.",p:"course_title, concept"},
+  {c:"passion-connector",g:"passion_connector",d:"Passion Connector. Designs a 5-minute segment linking the instructor's personal passion to course content.",p:"passion, course"},
+  {c:"prompt-optimizer",g:"prompt_optimizer",d:"Prompt Optimizer. Rewrites a rough prompt into a precise, production-ready prompt tuned for Claude, Gemini, or GPT.",p:"target_model, raw_prompt, …"}
+];
+function capRow(x){
+  return `<div class="cap-row"><div class="cap-main">
+    <div class="cap-names"><span class="cap-claude">/${x.c}</span><span class="cap-gpt">${x.g}</span></div>
+    <div class="cap-desc">${x.d}</div></div>
+    <div class="cap-params">${x.p==='—'?'no params':x.p}</div></div>`;
+}
+function buildTools(){
+  document.getElementById('catalogGuide').innerHTML=CAP_GUIDE.map(capRow).join('');
+  document.getElementById('catalogPrompts').innerHTML=CAP_PROMPTS.map(capRow).join('');
+  // copy buttons in the connect cards
+  document.querySelectorAll('#tools .copy-btn').forEach(b=>{
+    b.onclick=()=>{
+      const el=document.getElementById(b.dataset.copy);
+      const text=el.textContent;
+      navigator.clipboard.writeText(text).then(()=>{
+        b.textContent='Copied ✓';setTimeout(()=>b.textContent='Copy',1600);
+      }).catch(()=>{
+        const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);
+        ta.select();document.execCommand('copy');document.body.removeChild(ta);
+        b.textContent='Copied ✓';setTimeout(()=>b.textContent='Copy',1600);
+      });
+    };
+  });
+}
+/* health-check status pill: the /health root is plain JSON over HTTPS, safe to read from the browser */
+function checkMcpHealth(){
+  const pill=document.getElementById('mcpStatus');
+  const txt=document.getElementById('mcpStatusText');
+  if(!pill) return;
+  fetch('https://emxai-studio-mcp-production.up.railway.app/',{method:'GET',mode:'cors'})
+    .then(r=>r.ok?r.json().catch(()=>({})):Promise.reject())
+    .then(()=>{ pill.classList.add('live');pill.classList.remove('down');txt.textContent='server live · 13 tools'; })
+    .catch(()=>{ pill.classList.add('down');pill.classList.remove('live');txt.textContent='connect to use'; });
+}
+checkMcpHealth();
+buildTools();
 
 /* Hidden Mickey: arrow keys flip between habits when reading one */
 document.addEventListener('keydown',e=>{
